@@ -3,6 +3,7 @@ package day02;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.function.Function;
 
 public class RockPaperScissors {
 
@@ -93,7 +94,7 @@ public class RockPaperScissors {
         // First exercice
         scoreComputation.computeStrategyGuideScore();
 
-        // second exerice
+        // second exercice
         scoreComputation.computeStrategyGuideScoreV2();
     }
 
@@ -104,28 +105,20 @@ public class RockPaperScissors {
     }
 
     private int computeStrategyGuideScore() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File(this.filePath));
-        scanner.useDelimiter("\n");
-
-        int totalScore = 0;
-        while (scanner.hasNext()) {
-            String newChoices = scanner.next();
-            String[] choices = newChoices.split(" ");
-            Shape elveChoice = Shape.fromElveChoice(choices[0]);
-            Shape myChoice = Shape.fromMyChoice(choices[1]);
-            System.out.println("elveChoice : " + elveChoice + ", myChoice : " + myChoice);
-            int roundScore = myChoice.computeMyRoundScore(elveChoice);
-            int roundTotalScore = myChoice.getScore() + roundScore;
-            System.out.println("Round total score : " + roundScore + " (" + myChoice.getScore() + " + " + roundScore + ")");
-
-            totalScore += roundTotalScore;
-        }
-        System.out.println("totalScore : " + totalScore);
-
-        return totalScore;
+        return computeStrategyGuideScoreCommon(choices -> Shape.fromMyChoice(choices[1]));
     }
 
     private int computeStrategyGuideScoreV2() throws FileNotFoundException {
+        Function<String[], Shape> computeMyChoice = choices -> {
+            Shape elveChoice = Shape.fromElveChoice(choices[0]);
+            Score score = Score.fromChoice(choices[1]);
+            return elveChoice.computeMyChoiceBasedOnElveChoiceFromFinalScore(score);
+        };
+
+        return computeStrategyGuideScoreCommon(computeMyChoice);
+    }
+
+    private int computeStrategyGuideScoreCommon(Function<String[], Shape> computeMyChoice) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
 
@@ -134,8 +127,7 @@ public class RockPaperScissors {
             String newChoices = scanner.next();
             String[] choices = newChoices.split(" ");
             Shape elveChoice = Shape.fromElveChoice(choices[0]);
-            Score score = Score.fromChoice(choices[1]);
-            Shape myChoice = elveChoice.computeMyChoiceBasedOnElveChoiceFromFinalScore(score);
+            Shape myChoice = computeMyChoice.apply(choices);
             System.out.println("elveChoice : " + elveChoice + ", myChoice : " + myChoice);
             int roundScore = myChoice.computeMyRoundScore(elveChoice);
             int roundTotalScore = myChoice.getScore() + roundScore;
