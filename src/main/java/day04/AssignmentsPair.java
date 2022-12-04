@@ -19,6 +19,12 @@ public class AssignmentsPair {
         return firstElveRange.containsAll(secondElveRange) || secondElveRange.containsAll(firstElveRange);
     }
 
+    public boolean isOneRangeOverlappingOnTheOtherOne() {
+        List<Integer> firstElveRange = this.firstElveAssignment.getFullRange();
+        List<Integer> secondElveRange = this.secondElveAssignment.getFullRange();
+        return firstElveRange.stream().anyMatch(secondElveRange::contains);
+    }
+
     @Override
     public String toString() {
         return "AssignmentsPair{" +

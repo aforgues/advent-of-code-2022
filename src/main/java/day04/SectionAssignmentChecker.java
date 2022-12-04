@@ -14,7 +14,7 @@ public class SectionAssignmentChecker {
         app.computeScore();
 
         // second exercice
-        //app.computeScoreV2();
+        app.computeScoreV2();
     }
 
 
@@ -40,16 +40,19 @@ public class SectionAssignmentChecker {
         System.out.println("totalScore : " + totalScore);
     }
 
-    /*private void computeScoreV2() throws FileNotFoundException {
+    private void computeScoreV2() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
 
         int totalScore = 0;
         while (scanner.hasNext()) {
             String content = scanner.next();
-
-            //totalScore +=
+            System.out.println(content);
+            AssignmentsPair pair = new AssignmentsPair(content);
+            System.out.println(pair);
+            if (pair.isOneRangeOverlappingOnTheOtherOne())
+                totalScore ++;
         }
         System.out.println("totalScore : " + totalScore);
-    }*/
+    }
 }
