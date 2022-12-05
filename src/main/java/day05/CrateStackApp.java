@@ -11,26 +11,67 @@ public class CrateStackApp {
         CrateStackApp app = new CrateStackApp(path);
 
         // First exercice
-        app.computeScore();
+        app.computeCrateMover9000();
 
         // second exercice
-        //app.computeScoreV2();
+        app.computeCrateMover9001();
     }
 
 
     private final String filePath;
     private List<Stack> stacks;
+    private List<Move> moves;
 
     public CrateStackApp(String filePath) {
         this.filePath = filePath;
-        this.stacks = new ArrayList<>();
+        this.init();
     }
 
-    private void computeScore() throws FileNotFoundException {
+    private void init() {
+        this.stacks = new ArrayList<>();
+        this.moves = new ArrayList<>();
+    }
+
+    private void computeCrateMover9000() throws FileNotFoundException {
+        this.init();
+        this.parsePuzzle();
+
+        // apply rules to stacks
+        for (Move move : this.moves) {
+            Stack sourceStack = getStackByNumber(move.fromStackNumber());
+            Stack targetStack = getStackByNumber(move.toStackNumber());
+            for (int i = 0; i < move.nbCrateToMove(); i++) {
+                targetStack.addCrateOnTop(sourceStack.getCrates().get(0));
+                sourceStack.getCrates().remove(0);
+            }
+            System.out.println(this.stacks);
+        }
+        String totalScore = extractCrateIdentifierFromTopOfStacks();
+        System.out.println("totalScore : " + totalScore);
+    }
+
+    private void computeCrateMover9001() throws FileNotFoundException {
+        this.init();
+        this.parsePuzzle();
+
+        // apply new rules to stacks
+        for (Move move : this.moves) {
+            Stack sourceStack = getStackByNumber(move.fromStackNumber());
+            Stack targetStack = getStackByNumber(move.toStackNumber());
+            targetStack.getCrates().addAll(0, sourceStack.getCrates().subList(0, move.nbCrateToMove()));
+            if (move.nbCrateToMove() > 0) {
+                sourceStack.getCrates().subList(0, move.nbCrateToMove()).clear();
+            }
+            System.out.println(this.stacks);
+        }
+
+        String totalScore = extractCrateIdentifierFromTopOfStacks();
+        System.out.println("totalScore : " + totalScore);
+    }
+
+    private void parsePuzzle() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
-
-        String totalScore;
 
         boolean parsingStacks = true;
         while (scanner.hasNext()) {
@@ -64,22 +105,18 @@ public class CrateStackApp {
                 scan.next(); // skip to
                 int toStackNumber = scan.nextInt();
 
-                // apply rules to stacks
-                for (int i = 0; i<nbCrateToMove; i++) {
-                    Stack sourceStack = getStackByNumber(fromStackNumber);
-                    Stack targetStack = getStackByNumber(toStackNumber);
-                    targetStack.addCrateOnTop(sourceStack.getCrates().get(0));
-                    sourceStack.getCrates().remove(0);
-                }
-                System.out.println(this.stacks);
+                Move move = new Move(nbCrateToMove, fromStackNumber, toStackNumber);
+                this.moves.add(move);
             }
         }
-        totalScore = this.stacks.stream()
+    }
+
+    private String extractCrateIdentifierFromTopOfStacks() {
+        return this.stacks.stream()
                 .sorted(Comparator.comparingInt(Stack::getStackNumber))
                 .map(stack -> stack.getCrates().get(0))
                 .map(crate -> String.valueOf(crate.getIdentifier()))
-                        .reduce("", (a, b) -> a + b);
-        System.out.println("totalScore : " + totalScore);
+                .reduce("", (a, b) -> a + b);
     }
 
     private void appendCrateToStack(int stackNumber, char crateIdentifier) {
@@ -95,15 +132,4 @@ public class CrateStackApp {
         return this.stacks.stream().filter(stack -> stack.getStackNumber() == stackNumber).findFirst().orElse(null);
     }
 
-    /*private void computeScoreV2() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File(this.filePath));
-        scanner.useDelimiter("\n");
-
-        int totalScore = 0;
-        while (scanner.hasNext()) {
-            String content = scanner.next();
-
-        }
-        System.out.println("totalScore : " + totalScore);
-    }*/
 }
