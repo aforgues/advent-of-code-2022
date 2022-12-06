@@ -11,10 +11,10 @@ public class StartOfPacketMarkerApp {
         StartOfPacketMarkerApp app = new StartOfPacketMarkerApp(path);
 
         // First exercice
-        app.computeScore();
+        app.computeStartOfPacketMarker();
 
         // second exercice
-        //app.computeScoreV2();
+        app.computeStartOfMessageMarker();
     }
 
 
@@ -24,20 +24,15 @@ public class StartOfPacketMarkerApp {
         this.filePath = filePath;
     }
 
-    private void computeScore() throws FileNotFoundException {
+    private void computeStartOfPacketMarker() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
 
         while (scanner.hasNext()) {
             String content = scanner.next();
             System.out.println(content);
-            for (int i = 4; i <= content.length(); i++) {
-                String startOfPacketMarker = content.substring(i-4, i);
-                if (areAllCharacterDifferent(startOfPacketMarker)) {
-                    System.out.println("Start of packet marker is : " + i);
-                    break;
-                }
-            }
+            String marker = computeMarkerFromDistinctCharacterNumber(content, 4);
+            System.out.println("Start of packet marker is : " + marker);
         }
     }
 
@@ -50,13 +45,25 @@ public class StartOfPacketMarkerApp {
         return true;
     }
 
-    /*private void computeScoreV2() throws FileNotFoundException {
+    private void computeStartOfMessageMarker() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
 
         while (scanner.hasNext()) {
             String content = scanner.next();
             System.out.println(content);
+            String marker = computeMarkerFromDistinctCharacterNumber(content, 14);
+            System.out.println("Start of message marker is : " + marker);
         }
-    }*/
+    }
+
+    private String computeMarkerFromDistinctCharacterNumber(String data, int nbDistinctCharacterNumber) {
+        for (int i = nbDistinctCharacterNumber; i <= data.length(); i++) {
+            String startOfPacketMarker = data.substring(i-nbDistinctCharacterNumber, i);
+            if (areAllCharacterDifferent(startOfPacketMarker)) {
+                return "" + i;
+            }
+        }
+        return "";
+    }
 }
