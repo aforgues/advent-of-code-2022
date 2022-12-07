@@ -20,17 +20,20 @@ public class FSCleanerApp {
 
 
     private final String filePath;
+    private MyDirectory currentDirectory;
 
-    public FSCleanerApp(String filePath) {
+    public FSCleanerApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
+        this.currentDirectory = new MyDirectory("/", null); // init root directory
+        this.computeDirectoryTree();
     }
 
-    private void computeScoreV1() throws FileNotFoundException {
+    private void computeDirectoryTree() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(this.filePath));
         scanner.useDelimiter("\n");
 
         String currentCommand;
-        MyDirectory currentDirectory = new MyDirectory("/", null); // init root directory
+
 
         while (scanner.hasNext()) {
             String content = scanner.next();
@@ -80,6 +83,10 @@ public class FSCleanerApp {
         }
 
         System.out.println(currentDirectory);
+    }
+
+
+    private void computeScoreV1() {
 
         // go up to the root
         while (currentDirectory.getParentDirectory() != null) {
@@ -107,13 +114,15 @@ public class FSCleanerApp {
     }
 
     /*private void computeScoreV2() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File(this.filePath));
-        scanner.useDelimiter("\n");
-
-        while (scanner.hasNext()) {
-            String content = scanner.next();
-            System.out.println(content);
-
+        // go up to the root
+        while (currentDirectory.getParentDirectory() != null) {
+            currentDirectory = currentDirectory.getParentDirectory();
         }
+        System.out.println(currentDirectory);
+        System.out.println("Total size : " + currentDirectory.getTotalSize());
+
+        // TODO
+
+        System.out.println("Final score : " + score);
     }*/
 }
