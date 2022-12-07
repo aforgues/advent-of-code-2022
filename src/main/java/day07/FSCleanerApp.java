@@ -15,9 +15,11 @@ public class FSCleanerApp {
         app.computeScoreV1();
 
         // second exercice
-        //app.computeScoreV2();
+        app.computeScoreV2();
     }
 
+    private static final long MAX_DISK_SPACE = 70000000;
+    private static final long MIN_NEED_UNUSED_SPACE = 30000000;
 
     private final String filePath;
     private MyDirectory currentDirectory;
@@ -100,20 +102,20 @@ public class FSCleanerApp {
         System.out.println("Final score : " + score);
     }
 
-    private long computeTotalSizeParsingDirectoriesInTreeWithAtMost(MyDirectory currentDirectory, long maxSize) {
+    private long computeTotalSizeParsingDirectoriesInTreeWithAtMost(MyDirectory directory, long maxSize) {
         long totalSize = 0;
-        if (currentDirectory.getTotalSize() < maxSize) {
-            System.out.println("Matching directory : " + currentDirectory);
-            System.out.println("Matching directory totalSize : " + currentDirectory.getTotalSize());
-            totalSize += currentDirectory.getTotalSize();
+        if (directory.getTotalSize() < maxSize) {
+            System.out.println("Matching directory : " + directory);
+            System.out.println("Matching directory totalSize : " + directory.getTotalSize());
+            totalSize += directory.getTotalSize();
         }
-        for (MyDirectory subDirectory : currentDirectory.getSubDirectories()) {
+        for (MyDirectory subDirectory : directory.getSubDirectories()) {
             totalSize += computeTotalSizeParsingDirectoriesInTreeWithAtMost(subDirectory, maxSize);
         }
         return totalSize;
     }
 
-    /*private void computeScoreV2() throws FileNotFoundException {
+    private void computeScoreV2() {
         // go up to the root
         while (currentDirectory.getParentDirectory() != null) {
             currentDirectory = currentDirectory.getParentDirectory();
@@ -121,8 +123,27 @@ public class FSCleanerApp {
         System.out.println(currentDirectory);
         System.out.println("Total size : " + currentDirectory.getTotalSize());
 
-        // TODO
+        // compute current unused space
+        long currentUnusedSpace = MAX_DISK_SPACE - currentDirectory.getTotalSize();
+        System.out.println("Current unused space : " + currentUnusedSpace);
 
+        long remainingDiskSpaceToFree = MIN_NEED_UNUSED_SPACE - currentUnusedSpace;
+        System.out.println("Remaining disk space to free : " + remainingDiskSpaceToFree);
+
+        long score = computeSmallestDirectorySizeInTreeWithAtLeast(currentDirectory, remainingDiskSpaceToFree);
         System.out.println("Final score : " + score);
-    }*/
+    }
+
+    private long computeSmallestDirectorySizeInTreeWithAtLeast(MyDirectory directory, long minSize) {
+        long minDirectorySize = MIN_NEED_UNUSED_SPACE;
+        if (directory.getTotalSize() >= minSize) {
+            System.out.println("Matching directory : " + directory);
+            System.out.println("Matching directory totalSize : " + directory.getTotalSize());
+            minDirectorySize = Math.min(minDirectorySize, directory.getTotalSize());
+        }
+        for (MyDirectory subDirectory : directory.getSubDirectories()) {
+            minDirectorySize = Math.min(minDirectorySize, computeSmallestDirectorySizeInTreeWithAtLeast(subDirectory, minSize));
+        }
+        return minDirectorySize;
+    }
 }
