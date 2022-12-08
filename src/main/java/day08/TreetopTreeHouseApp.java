@@ -74,7 +74,33 @@ public class TreetopTreeHouseApp {
     }
 
     private void computeScoreV2() {
+        int score = 0;
 
-        //System.out.println("Final score : " + score);
+        for (TreeLine treeLine : this.forestMap.getTreeLines().values()) {
+            for (ChristmasTree christmasTree : treeLine.getChristmasTrees()) {
+                System.out.println(christmasTree);
+
+                // get edge trees in all directions
+                int globalScenicScore = 1;
+                for (Direction direction : Direction.values()) {
+                    List<ChristmasTree> edgeTrees = this.forestMap.getEdgeTrees(christmasTree, direction);
+                    System.out.println("Edge trees in " + direction.name() + " : " + edgeTrees);
+
+                    int scenicScore = 0;
+                    for (ChristmasTree edgeTree : edgeTrees) {
+                        scenicScore++;
+                        if (edgeTree.getSize() >= christmasTree.getSize()) {
+                            break;
+                        }
+                    }
+                    System.out.println("scenic score : " + scenicScore);
+                    globalScenicScore *= scenicScore;
+                }
+
+                score = Math.max(score, globalScenicScore);
+            }
+        }
+
+        System.out.println("Final score : " + score);
     }
 }
