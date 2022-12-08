@@ -4,3 +4,4 @@ Participation to the https://adventofcode.com/2022 in collaboration with ManoMan
 Here are the puzzle pitches :
 - [Day 6 - Tuning Trouble](./docs/day06.md)
 - [Day 7 - No space left on Device](./docs/day07.md)
+- [Day 8 - Treetop Tree House](./docs/day08.md)
