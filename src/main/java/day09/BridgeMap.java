@@ -2,6 +2,7 @@ package day09;
 
 import day08.Direction;
 
+import java.util.Comparator;
 import java.util.HashSet;
 
 public class BridgeMap {
@@ -20,16 +21,22 @@ public class BridgeMap {
     }
 
     public void printMapInConsole() {
-        for (int y = Math.max(this.ropeHeadPosition.y(), this.ropeTailPosition.y()); y >=0; y--) {
-            for (int x = 0; x <= Math.max(this.ropeHeadPosition.x(), this.ropeTailPosition.x()); x++) {
-                if (ropeHeadPosition.equals(new Position(x, y))) {
+        int maxX = Math.max(Math.max(this.tailPath.getPositions().stream().map(Position::x).max(Comparator.comparingInt(i -> i)).get(), this.ropeTailPosition.x()), this.ropeHeadPosition.x());
+        int maxY = Math.max(Math.max(this.tailPath.getPositions().stream().map(Position::y).max(Comparator.comparingInt(i -> i)).get(), this.ropeTailPosition.y()), this.ropeHeadPosition.y());
+        for (int y = maxY; y >=0; y--) {
+            for (int x = 0; x <= maxX; x++) {
+                Position currentPosition = new Position(x, y);
+                if (ropeHeadPosition.equals(currentPosition)) {
                     System.out.print("H");
                 }
-                else if (ropeTailPosition.equals(new Position(x, y))) {
+                else if (ropeTailPosition.equals(currentPosition)) {
                     System.out.print("T");
                 }
-                else if (new Position(0,0).equals(new Position(x, y))) {
+                else if (new Position(0,0).equals(currentPosition)) {
                     System.out.print("s");
+                }
+                else if (this.tailPath.getPositions().contains(currentPosition)) {
+                    System.out.print("#");
                 }
                 else {
                     System.out.print(".");

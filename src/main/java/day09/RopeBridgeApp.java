@@ -8,8 +8,8 @@ import java.util.*;
 
 public class RopeBridgeApp {
     public static void main(String[] args) throws FileNotFoundException {
-        String path = "src/main/resources/day09/rope_bridge_moves.txt";
-        //String path = "src/main/resources/day09/rope_bridge_moves_test.txt";
+        //String path = "src/main/resources/day09/rope_bridge_moves.txt";
+        String path = "src/main/resources/day09/rope_bridge_moves_test.txt";
         RopeBridgeApp app = new RopeBridgeApp(path);
 
         // First exercice
@@ -53,7 +53,7 @@ public class RopeBridgeApp {
             //this.bridgeMap.printMapInConsole();
         }
         System.out.println(this.bridgeMap);
-        //this.bridgeMap.printMapInConsole();
+        this.bridgeMap.printMapInConsole();
 
         System.out.println("Final score : " + this.bridgeMap.getUniqueTailPathCount());
     }
