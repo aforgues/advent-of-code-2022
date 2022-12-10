@@ -11,3 +11,4 @@ Here are the puzzle pitches :
 - [Day 7 - No space left on Device](./docs/day07.md)
 - [Day 8 - Treetop Tree House](./docs/day08.md)
 - [Day 9 - Rope Bridge](./docs/day09.md)
+- [Day 10 - Cathode-Ray Tube](./docs/day10.md)
