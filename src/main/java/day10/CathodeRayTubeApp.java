@@ -12,11 +12,8 @@ public class CathodeRayTubeApp {
         //String path = "src/main/resources/day10/instructions_test.txt";
         CathodeRayTubeApp app = new CathodeRayTubeApp(path);
 
-        // First exercice
-        app.computeScoreV1();
-
-        // second exercice
-        app.computeScoreV2();
+        // First and second exercice
+        app.computeScore();
     }
 
 
@@ -41,9 +38,10 @@ public class CathodeRayTubeApp {
         System.out.println(this.instructions);
     }
 
-    private void computeScoreV1() {
+    private void computeScore() {
         int cycleCount = 0;
         int register = 1;
+        CRTScreen crtScreen = new CRTScreen(register);
         List<Integer> cyclesToCheck = List.of(20, 60, 100, 140, 180, 220);
 
         int totalSignalStrength = 0;
@@ -53,8 +51,11 @@ public class CathodeRayTubeApp {
                 cycleCount ++;
 
                 System.out.println("Cycle current count : " + cycleCount);
-
                 System.out.println("Register value (X) : " + register);
+
+                crtScreen.drawPixel(cycleCount, register);
+                System.out.println("Sprite position : " + crtScreen.displaySprite());
+                System.out.println("Current CRT raw : \n" + crtScreen.displayCRT());
 
                 if (cyclesToCheck.contains(cycleCount)) {
                     System.out.println("SIGNAL STRENGTH at cycle " + cycleCount + " : " + cycleCount * register);
@@ -70,9 +71,6 @@ public class CathodeRayTubeApp {
         System.out.println("Total nb of cycles : " + cycleCount);
         System.out.println("Register final value (X) : " + register);
         System.out.println("Total signal strength : " + totalSignalStrength);
-    }
-
-    private void computeScoreV2() {
-        // TODO
+        System.out.println("Current CRT raw : \n" + crtScreen.displayCRT());
     }
 }
