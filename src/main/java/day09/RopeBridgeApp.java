@@ -8,8 +8,9 @@ import java.util.*;
 
 public class RopeBridgeApp {
     public static void main(String[] args) throws FileNotFoundException {
-        //String path = "src/main/resources/day09/rope_bridge_moves.txt";
-        String path = "src/main/resources/day09/rope_bridge_moves_test.txt";
+        String path = "src/main/resources/day09/rope_bridge_moves.txt";
+        //String path = "src/main/resources/day09/rope_bridge_moves_test.txt";
+        //String path = "src/main/resources/day09/rope_bridge_moves_test_v2.txt";
         RopeBridgeApp app = new RopeBridgeApp(path);
 
         // First exercice
@@ -22,12 +23,10 @@ public class RopeBridgeApp {
 
     private final String filePath;
     private List<Move> moves;
-    private BridgeMap bridgeMap;
 
     public RopeBridgeApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
         this.moves = new ArrayList<>();
-        this.bridgeMap = new BridgeMap(new Position(0, 0), new Position(0, 0));
         this.parseFile();
     }
 
@@ -41,25 +40,29 @@ public class RopeBridgeApp {
             this.moves.add(new Move(content));
         }
         System.out.println(this.moves);
-        System.out.println(this.bridgeMap);
-        this.bridgeMap.printMapInConsole();
     }
 
     private void computeScoreV1() {
-        for (Move move : this.moves) {
-            System.out.println(move);
-            this.bridgeMap.moveHead(move);
-            //System.out.println(this.bridgeMap);
-            //this.bridgeMap.printMapInConsole();
-        }
-        System.out.println(this.bridgeMap);
-        this.bridgeMap.printMapInConsole();
-
-        System.out.println("Final score : " + this.bridgeMap.getUniqueTailPathCount());
+        computeScore(1);
     }
 
     private void computeScoreV2() {
-        //int score = 0;
-        //System.out.println("Final score : " + score);
+        computeScore(9);
+    }
+
+    private void computeScore(int numberOfTailKnots) {
+        BridgeMap bridgeMap = new BridgeMap(new Position(0, 0), numberOfTailKnots, new Position(0, 0));
+        System.out.println(bridgeMap);
+        bridgeMap.printMapInConsole();
+        for (Move move : this.moves) {
+            System.out.println(move);
+            bridgeMap.moveHead(move);
+            //System.out.println(this.bridgeMap);
+            //this.bridgeMap.printMapInConsole();
+        }
+        System.out.println(bridgeMap);
+        bridgeMap.printMapInConsole();
+
+        System.out.println("Final score with 1 tail knot : " + bridgeMap.getUniqueTailPathCount());
     }
 }
