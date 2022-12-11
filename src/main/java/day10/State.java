@@ -1,8 +1,8 @@
 package day10;
 
 public enum State {
-    LIT("#"),
-    DARK(".");
+    LIT("⚪"),
+    DARK("⚫");
 
     private final String value;
 
