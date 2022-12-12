@@ -13,6 +13,7 @@ public class MonkeyInTheMiddleApp {
     private static final String IF_TRUE_THROW_TO_MONKEY = "    If true: throw to monkey ";
     private static final String IF_FALSE_THROW_TO_MONKEY = "    If false: throw to monkey ";
     private static final int NUMBER_OF_ROUNDS = 20;
+    private static final int NUMBER_OF_ROUNDS_PART_2 = 10000;
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = "src/main/resources/day11/monkey_notes.txt";
@@ -20,17 +21,18 @@ public class MonkeyInTheMiddleApp {
         MonkeyInTheMiddleApp app = new MonkeyInTheMiddleApp(path);
 
         // First exercise
-        app.computeScore();
+        app.computeScoreV1();
+
+        // Second exercise
+        app.computeScoreV2();
     }
 
 
     private final String filePath;
     private List<Monkey> monkeys;
 
-    public MonkeyInTheMiddleApp(String filePath) throws FileNotFoundException {
+    public MonkeyInTheMiddleApp(String filePath) {
         this.filePath = filePath;
-        this.monkeys = new ArrayList<>();
-        this.parseFile();
     }
 
     private void parseFile() throws FileNotFoundException {
@@ -65,15 +67,26 @@ public class MonkeyInTheMiddleApp {
         System.out.println(this.monkeys);
     }
 
-    private void computeScore() {
-        int score;
+    private void computeScoreV1() throws FileNotFoundException {
+        this.computeScore(NUMBER_OF_ROUNDS, 3);
+    }
+
+    private void computeScoreV2() throws FileNotFoundException {
+        this.computeScore(NUMBER_OF_ROUNDS_PART_2, 1);
+    }
+
+    private void computeScore(int numberOfRounds, int reliefDivisor) throws FileNotFoundException {
+        this.monkeys = new ArrayList<>();
+        this.parseFile();
+
+        int worryManageableDivisor = this.monkeys.stream().map(Monkey::getDivisionTestValue).reduce(1, (a, b) -> a * b);
 
         // N rounds
-        for (int i = 1; i <= NUMBER_OF_ROUNDS; i++) {
+        for (int i = 1; i <= numberOfRounds; i++) {
             System.out.println("### ROUND NUMBER : " + i + " ###");
             for (Monkey monkey : this.monkeys) {
                 System.out.println("Monkey " + monkey.getNumber() + ":");
-                Map<Integer, List<Item>> itemsToMoveByMonkeyNumber = monkey.inspectItems();
+                Map<Integer, List<Item>> itemsToMoveByMonkeyNumber = monkey.inspectItems(reliefDivisor, worryManageableDivisor);
                 for (int monkeyNumber : itemsToMoveByMonkeyNumber.keySet()) {
                     List<Item> itemsToMove = itemsToMoveByMonkeyNumber.get(monkeyNumber);
                     this.monkeys.get(monkeyNumber).getItems().addAll(itemsToMove);
@@ -86,7 +99,7 @@ public class MonkeyInTheMiddleApp {
         }
 
         // extract top 2 monkeys based on inspectionCount
-        score = this.monkeys.stream().map(Monkey::getInspectionCounter).sorted(Comparator.reverseOrder()).limit(2).reduce(1, (a, b) -> a * b);
+        long score = this.monkeys.stream().map(Monkey::getInspectionCounter).sorted(Comparator.reverseOrder()).limit(2).map(Integer::longValue).reduce(1L, (a, b) -> a * b);
         System.out.println("Level of Monkey business : " + score);
     }
 }

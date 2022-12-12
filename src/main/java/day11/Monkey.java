@@ -9,19 +9,19 @@ public class Monkey {
     private int divisionTestValue;
     private int validTestTargetMonkeyNumber;
     private int invalidTestTargetMonkeyNumber;
-
     private int inspectionCounter;
 
     public int getInspectionCounter() {
         return inspectionCounter;
     }
-
     public int getNumber() {
         return this.number;
     }
-
     public List<Item> getItems() {
         return this.items;
+    }
+    public int getDivisionTestValue() {
+        return divisionTestValue;
     }
 
     public Monkey(int number) {
@@ -53,15 +53,17 @@ public class Monkey {
         this.invalidTestTargetMonkeyNumber = Integer.parseInt(targetMonkey);
     }
 
-    public Map<Integer, List<Item>> inspectItems() {
+    public Map<Integer, List<Item>> inspectItems(int reliefDivisor, int worryManageableDivisor) {
         Map<Integer, List<Item>> itemsByMonkeyNumberToMove = new HashMap<>();
         List<Item> allItemsToMove = new ArrayList<>();
         for (Item item : this.items) {
             System.out.println("  Monkey inspects an item with a worry level of " + item.worryLevel());
             long newWorryLevel = this.operation.execute(item.worryLevel());
             System.out.println("    Worry level is updated to " + newWorryLevel);
-            long reliefWorryLevel = newWorryLevel / 3;
-            System.out.println("    Monkey gets bored with item. Worry level is divided by 3 to " + reliefWorryLevel);
+            long reliefWorryLevel = newWorryLevel / reliefDivisor;
+            System.out.println("    Monkey gets bored with item. Worry level is divided by " + reliefDivisor + " to " + reliefWorryLevel);
+            reliefWorryLevel = reliefWorryLevel % worryManageableDivisor;
+            System.out.println("    Update worry level with modulo " + worryManageableDivisor + " to " + reliefWorryLevel);
             boolean isTestValid = reliefWorryLevel % this.divisionTestValue == 0;
             System.out.println("    Current worry level is " + (! isTestValid ? "not " : "") + "divisible by " + this.divisionTestValue);
             int targetMonkey = isTestValid ? this.validTestTargetMonkeyNumber : this.invalidTestTargetMonkeyNumber;
