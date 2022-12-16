@@ -11,6 +11,10 @@ public class HillMap {
     private Position targetPosition;
     private Position currentPosition;
 
+    public Position getTargetPosition() {
+        return targetPosition;
+    }
+
     public HillMap() {
         this.squares = new ArrayList<>();
     }
@@ -40,10 +44,8 @@ public class HillMap {
         this.squares.add(new Square(position, elevation, position.equals(this.currentPosition)));
     }
 
-    public List<Square> getNextEligibleSquares() {
+    public List<Square> getNextEligibleSquares(int maxColumnIndex, int maxRowIndex) {
         List<Square> nextEligibleSquares = new ArrayList<>();
-        Square currentSquare = this.getCurrentSquare();
-        Elevation currentElevation = currentSquare.elevation();
 
         // check each direction
         for (Move move : Move.values()) {
@@ -53,12 +55,12 @@ public class HillMap {
                 case DOWN -> new Position(this.currentPosition.x(), this.currentPosition.y() + 1);
                 case UP -> new Position(this.currentPosition.x(), this.currentPosition.y() - 1);
             };
-            if (nextEligiblePosition.x() < 0 || nextEligiblePosition.x() > getMaxColumnIndex())
+            if (nextEligiblePosition.x() < 0 || nextEligiblePosition.x() > maxColumnIndex)
                 continue;
-            if (nextEligiblePosition.y() < 0 || nextEligiblePosition.y() > getMaxRowIndex())
+            if (nextEligiblePosition.y() < 0 || nextEligiblePosition.y() > maxRowIndex)
                 continue;
             Square nextEligibleSquare = getSquareByPosition(nextEligiblePosition);
-            int distance = nextEligibleSquare.elevation().value() - currentElevation.value();
+            int distance = nextEligibleSquare.elevation().value() - this.getCurrentSquare().elevation().value();
             if ((distance == 0 || distance == 1)
             && ! nextEligibleSquare.isVisited()) {
                 nextEligibleSquares.add(nextEligibleSquare);
@@ -67,11 +69,11 @@ public class HillMap {
         return nextEligibleSquares;
     }
 
-    private int getMaxRowIndex() {
+    public int getMaxRowIndex() {
         return this.squares.stream().map(s -> s.position().y()).max(Comparator.naturalOrder()).get();
     }
 
-    private int getMaxColumnIndex() {
+    public int getMaxColumnIndex() {
         return this.squares.stream().map(s -> s.position().x()).max(Comparator.naturalOrder()).get();
     }
 
