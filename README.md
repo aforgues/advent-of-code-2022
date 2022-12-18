@@ -13,3 +13,4 @@ Here are the puzzle pitches :
 - [Day 9 - Rope Bridge](./docs/day09.md)
 - [Day 10 - Cathode-Ray Tube](./docs/day10.md)
 - [Day 11 - Monkey In The Middle](./docs/day11.md)
+- [Day 18 - Boiling Boulders](./docs/day18.md)
