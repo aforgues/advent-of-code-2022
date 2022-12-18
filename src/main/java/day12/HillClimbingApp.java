@@ -48,6 +48,7 @@ public class HillClimbingApp {
 
         //int score = findMaxElevationSquareDFS(root);
         int score = findMaxElevationSquareBFS(root);
+        //int score = findMaxElevationSquareBFSv2(root);
 
         System.out.println("Score : " + score);
     }
@@ -114,5 +115,37 @@ public class HillClimbingApp {
             }
         }
         return -1;
+    }
+
+    private int findMaxElevationSquareBFSv2(TreeNode currentTreeNode) {
+        Graph graph = new Graph();
+        int maxColumnIndex = this.hillMap.getMaxColumnIndex();
+        int maxRowIndex = this.hillMap.getMaxRowIndex();
+
+        for (Square square : this.hillMap.getSquares()) {
+            //System.out.println("Handling : " + square.position());
+            for (Square adj : this.hillMap.getNextEligibleSquares(square.position(), maxColumnIndex, maxRowIndex)) {
+                //System.out.println("Adding edge to pos " + square.position() + " : " + adj.position());
+                graph.addEdge(square.position(), adj.position());
+            }
+        }
+        List<Position> path = graph.BFS(currentTreeNode.getCurrentSquare().position(), this.hillMap.getTargetPosition());
+        System.out.println("Path size is " + path.size());
+
+        return computeMinStepFromTargetToStartingPoint(graph, path.get(path.size() - 1));
+    }
+
+    private int computeMinStepFromTargetToStartingPoint(Graph graph, Position position) {
+        int minStepFromTargetToStartingPoint = Integer.MAX_VALUE;
+        System.out.println(position + " -> parents : " + graph.getParentPositions(position));
+        if (position.equals(this.hillMap.getCurrentSquare().position())) {
+            return minStepFromTargetToStartingPoint;
+        }
+        for (Position parent : graph.getParentPositions(position)) {
+            if (graph.getParentPositions(position).contains(parent))
+                continue;
+            minStepFromTargetToStartingPoint = Math.min(minStepFromTargetToStartingPoint, computeMinStepFromTargetToStartingPoint(graph, parent));
+        }
+        return minStepFromTargetToStartingPoint;
     }
 }

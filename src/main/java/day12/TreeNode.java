@@ -39,10 +39,7 @@ public class TreeNode {
     }
 
     public List<Square> getNextEligibleSquares() {
-        // optimize code to compute maxRow and maxColumn only once
-        int maxColumnIndex = this.hillMap.getMaxColumnIndex();
-        int maxRowIndex = this.hillMap.getMaxRowIndex();
-        return this.hillMap.getNextEligibleSquares(maxColumnIndex, maxRowIndex);
+        return this.hillMap.getNextEligibleSquares();
     }
 
     public void displayPathInConsole() {

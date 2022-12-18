@@ -11,6 +11,10 @@ public class HillMap {
     private Position targetPosition;
     private Position currentPosition;
 
+    public List<Square> getSquares() {
+        return this.squares;
+    }
+
     public Position getTargetPosition() {
         return targetPosition;
     }
@@ -44,24 +48,28 @@ public class HillMap {
         this.squares.add(new Square(position, elevation, position.equals(this.currentPosition)));
     }
 
-    public List<Square> getNextEligibleSquares(int maxColumnIndex, int maxRowIndex) {
+    public List<Square> getNextEligibleSquares() {
+        return this.getNextEligibleSquares(this.currentPosition, this.getMaxColumnIndex(), this.getMaxRowIndex());
+    }
+    public List<Square> getNextEligibleSquares(Position position, int maxColumnIndex, int maxRowIndex) {
         List<Square> nextEligibleSquares = new ArrayList<>();
 
         // check each direction
         for (Move move : Move.values()) {
             Position nextEligiblePosition = switch (move) {
-                case RIGHT -> new Position(this.currentPosition.x() + 1, this.currentPosition.y());
-                case LEFT -> new Position(this.currentPosition.x() - 1, this.currentPosition.y());
-                case DOWN -> new Position(this.currentPosition.x(), this.currentPosition.y() + 1);
-                case UP -> new Position(this.currentPosition.x(), this.currentPosition.y() - 1);
+                case RIGHT -> new Position(position.x() + 1, position.y());
+                case LEFT -> new Position(position.x() - 1, position.y());
+                case DOWN -> new Position(position.x(), position.y() + 1);
+                case UP -> new Position(position.x(), position.y() - 1);
             };
             if (nextEligiblePosition.x() < 0 || nextEligiblePosition.x() > maxColumnIndex)
                 continue;
             if (nextEligiblePosition.y() < 0 || nextEligiblePosition.y() > maxRowIndex)
                 continue;
             Square nextEligibleSquare = getSquareByPosition(nextEligiblePosition);
-            int distance = nextEligibleSquare.elevation().value() - this.getCurrentSquare().elevation().value();
-            if ((distance == 0 || distance == 1)
+            Square givenSquare = getSquareByPosition(position);
+            int distance = nextEligibleSquare.elevation().value() - givenSquare.elevation().value();
+            if ((distance == 0 || distance == 1 /*|| distance == -1*/)
             && ! nextEligibleSquare.isVisited()) {
                 nextEligibleSquares.add(nextEligibleSquare);
             }
