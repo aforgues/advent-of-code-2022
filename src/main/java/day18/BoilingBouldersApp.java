@@ -9,20 +9,24 @@ import java.util.*;
 public class BoilingBouldersApp {
 
     public static void main(String[] args) throws FileNotFoundException {
-        String path = "src/main/resources/day18/lava_droplet_scan.txt";
-        //String path = "src/main/resources/day18/lava_droplet_scan_test.txt";
+        //String path = "src/main/resources/day18/lava_droplet_scan.txt";
+        String path = "src/main/resources/day18/lava_droplet_scan_test.txt";
         BoilingBouldersApp app = new BoilingBouldersApp(path);
 
         // First exercise
-        app.computeScore();
+        app.computeScore(false);
+
+        // Second exercise
+        app.computeScore(true);
     }
 
     private final String filePath;
     private List<Cube> grid;
 
-    public BoilingBouldersApp(String filePath) {
+    public BoilingBouldersApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
         this.grid = new ArrayList<>();
+        this.parseFile();
     }
 
     private void parseFile() throws FileNotFoundException {
@@ -41,9 +45,7 @@ public class BoilingBouldersApp {
         System.out.println(grid);
     }
 
-    private void computeScore() throws FileNotFoundException {
-        this.parseFile();
-
+    private void computeScore(boolean includeAlmostConnected) {
         int score = 0;
         //Compute unconnected sides of each cube
         for (Cube cube : this.grid) {
@@ -51,12 +53,12 @@ public class BoilingBouldersApp {
             for (Cube otherCube : this.grid) {
                 if (otherCube.equals(cube))
                     continue;
-                Set<Type> connectedTypes = cube.getConnectedSideTypes(otherCube);
+                Set<Type> connectedTypes = cube.getConnectedSideTypes(otherCube, includeAlmostConnected);
                 allConnectedTypes.addAll(connectedTypes);
                 //System.out.println("Cube " + cube + " has " + connectedTypes + " sides connected to " + otherCube);
             }
             score += (6 - allConnectedTypes.size());
-            System.out.println("Cube " + cube + " has " + (6 - allConnectedTypes.size()) + " sides exposed");
+            System.out.println("Cube " + cube + " has " + (6 - allConnectedTypes.size()) + " sides exposed => connected ones are " + allConnectedTypes);
         }
 
         System.out.println("Score : " + score);
