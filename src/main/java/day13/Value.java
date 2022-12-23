@@ -2,7 +2,7 @@ package day13;
 
 import java.util.*;
 
-public class Value {
+public class Value implements Comparable<Value> {
     private final boolean isArray;
     private final List<Value> valueList;
     private Integer intValue;
@@ -189,6 +189,10 @@ public class Value {
         return s.toString();
     }
 
+    @Override
+    public int compareTo(Value o) {
+        return o.compare(this);
+    }
 
     @Override
     public String toString() {

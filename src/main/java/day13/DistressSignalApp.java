@@ -2,9 +2,7 @@ package day13;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class DistressSignalApp {
 
@@ -14,15 +12,19 @@ public class DistressSignalApp {
         DistressSignalApp app = new DistressSignalApp(path);
 
         // First exercise
-        app.computeScore();
+        app.computeScoreV1();
+
+        // Second exercise
+        app.computeScoreV2();
     }
 
     private final String filePath;
-    private List<PacketPair> pairs;
+    private final List<PacketPair> pairs;
 
-    public DistressSignalApp(String filePath) {
+    public DistressSignalApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
         this.pairs = new ArrayList<>();
+        this.parseFile();
     }
 
     private void parseFile() throws FileNotFoundException {
@@ -45,8 +47,8 @@ public class DistressSignalApp {
         System.out.println(this.pairs);
     }
 
-    private void computeScore() throws FileNotFoundException {
-        this.parseFile();
+    private void computeScoreV1() {
+
 
         int score = 0;
 
@@ -61,4 +63,28 @@ public class DistressSignalApp {
 
         System.out.println("Score : " + score);
     }
+
+    private void computeScoreV2() {
+        Set<Value> sortedValues = new TreeSet<>();
+
+        for (PacketPair pair : this.pairs) {
+            sortedValues.add(pair.leftPacket().getValue());
+            sortedValues.add(pair.rightPacket().getValue());
+        }
+
+        // Add divisors
+        Value firstDivisorPacketValue = new Value("[[2]]");
+        Value secondDivisorPacketValue = new Value("[[6]]");
+        sortedValues.addAll(List.of(firstDivisorPacketValue, secondDivisorPacketValue));
+
+        //System.out.println(sortedValues);
+        //sortedValues.stream().forEach(v -> System.out.println(v.displayValue()));
+
+        List<Value> sortedValuesAsList = sortedValues.stream().toList();
+        System.out.println("First divider packet is at index " + (sortedValuesAsList.indexOf(firstDivisorPacketValue) + 1));
+        System.out.println("Second divider packet is at index " + (sortedValuesAsList.indexOf(secondDivisorPacketValue) + 1));
+
+        System.out.println("Decoder key for distress signal is : " + (sortedValuesAsList.indexOf(firstDivisorPacketValue) + 1) * (sortedValuesAsList.indexOf(secondDivisorPacketValue) + 1));
+    }
+
 }
