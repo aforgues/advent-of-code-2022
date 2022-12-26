@@ -9,27 +9,17 @@ import java.util.List;
 public class HillMap {
     private final List<Square> squares;
     private Position targetPosition;
-    private Position currentPosition;
-
-    public List<Square> getSquares() {
-        return this.squares;
-    }
+    private Position startingPosition;
 
     public Position getTargetPosition() {
         return targetPosition;
     }
+    public Position getStartingPosition() {
+        return startingPosition;
+    }
 
     public HillMap() {
         this.squares = new ArrayList<>();
-    }
-
-    public HillMap(HillMap hillMap, Position newCurrentPosition) {
-        this.squares = new ArrayList<>(hillMap.squares);
-        this.targetPosition = hillMap.targetPosition;
-        this.currentPosition = newCurrentPosition;
-
-        Square currentSquare = this.getCurrentSquare();
-        this.squares.set(this.squares.indexOf(currentSquare), new Square(this.currentPosition, currentSquare.elevation(), true));
     }
 
     public void addSquare(Position position, char elevationChar) {
@@ -37,7 +27,7 @@ public class HillMap {
         switch (elevationChar) {
             case 'S' -> {
                 elevation = Elevation.a;
-                this.currentPosition = position;
+                this.startingPosition = position;
             }
             case 'E' -> {
                 elevation = Elevation.z;
@@ -45,12 +35,13 @@ public class HillMap {
             }
             default -> elevation = Elevation.valueOf(Character.toString(elevationChar));
         }
-        this.squares.add(new Square(position, elevation, position.equals(this.currentPosition)));
+        this.squares.add(new Square(position, elevation));
     }
 
-    public List<Square> getNextEligibleSquares() {
-        return this.getNextEligibleSquares(this.currentPosition, this.getMaxColumnIndex(), this.getMaxRowIndex());
+    public List<Square> getNextEligibleSquares(Position position) {
+        return getNextEligibleSquares(position, this.getMaxColumnIndex(), this.getMaxRowIndex());
     }
+
     public List<Square> getNextEligibleSquares(Position position, int maxColumnIndex, int maxRowIndex) {
         List<Square> nextEligibleSquares = new ArrayList<>();
 
@@ -69,8 +60,7 @@ public class HillMap {
             Square nextEligibleSquare = getSquareByPosition(nextEligiblePosition);
             Square givenSquare = getSquareByPosition(position);
             int distance = nextEligibleSquare.elevation().value() - givenSquare.elevation().value();
-            if ((distance == 0 || distance == 1 /*|| distance == -1*/)
-            && ! nextEligibleSquare.isVisited()) {
+            if ((distance == 0 || distance == 1)) {
                 nextEligibleSquares.add(nextEligibleSquare);
             }
         }
@@ -85,15 +75,11 @@ public class HillMap {
         return this.squares.stream().map(s -> s.position().x()).max(Comparator.naturalOrder()).get();
     }
 
-    public Square getCurrentSquare() {
-        return getSquareByPosition(this.currentPosition);
+    public boolean isAtTargetPosition(Position position) {
+        return position.equals(this.targetPosition);
     }
 
-    public boolean isAtTargetPosition() {
-        return this.currentPosition.equals(this.targetPosition);
-    }
-
-    private Square getSquareByPosition(Position position) {
+    public Square getSquareByPosition(Position position) {
         return this.squares.stream().filter(s -> s.position().equals(position)).findFirst().get();
     }
 
@@ -102,7 +88,7 @@ public class HillMap {
         return "HillMap{" +
                 "squares=" + squares +
                 ", targetPosition=" + targetPosition +
-                ", startingPosition=" + currentPosition +
+                ", startingPosition=" + startingPosition +
                 '}';
     }
 }

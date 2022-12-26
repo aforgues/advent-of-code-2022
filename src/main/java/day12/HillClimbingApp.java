@@ -9,8 +9,8 @@ import java.util.*;
 public class HillClimbingApp {
 
     public static void main(String[] args) throws FileNotFoundException {
-        //String path = "src/main/resources/day12/heightmap.txt";
-        String path = "src/main/resources/day12/heightmap_test.txt";
+        String path = "src/main/resources/day12/heightmap.txt";
+        //String path = "src/main/resources/day12/heightmap_test.txt";
         HillClimbingApp app = new HillClimbingApp(path);
 
         // First exercise
@@ -44,11 +44,10 @@ public class HillClimbingApp {
     private void computeScore() throws FileNotFoundException {
         this.parseFile();
 
-        TreeNode root = new TreeNode(this.hillMap, 0, null);
+        TreeNode root = new TreeNode(this.hillMap.getStartingPosition(), 0, null);
 
         //int score = findMaxElevationSquareDFS(root);
         int score = findMaxElevationSquareBFS(root);
-        //int score = findMaxElevationSquareBFSv2(root);
 
         System.out.println("Score : " + score);
     }
@@ -57,14 +56,20 @@ public class HillClimbingApp {
         int nbMinStepsToTarget = Integer.MAX_VALUE;
         //System.out.println("CurrentTreeNode = " + currentTreeNode);
 
-        if (currentTreeNode.isAtTargetPosition()) {
+        if (isAtTargetPosition(currentTreeNode.getCurrentPosition())) {
             nbMinStepsToTarget = currentTreeNode.getDepth();
         }
-        for (Square nextEligibleSquare : currentTreeNode.getNextEligibleSquares()) {
-            TreeNode child = currentTreeNode.addChild(nextEligibleSquare.position());
-            nbMinStepsToTarget = Math.min(nbMinStepsToTarget, findMaxElevationSquareDFS(child));
+        for (Square nextEligibleSquare : this.hillMap.getNextEligibleSquares(currentTreeNode.getCurrentPosition())) {
+            if (!currentTreeNode.getPath().contains(nextEligibleSquare.position())) {
+                TreeNode child = currentTreeNode.addChild(nextEligibleSquare.position());
+                nbMinStepsToTarget = Math.min(nbMinStepsToTarget, findMaxElevationSquareDFS(child));
+            }
         }
         return nbMinStepsToTarget;
+    }
+
+    private boolean isAtTargetPosition(Position position) {
+        return this.hillMap.isAtTargetPosition(position);
     }
 
     /*
@@ -82,70 +87,78 @@ public class HillClimbingApp {
 12                  w.parent := v
 13                  Q.enqueue(w)
      */
-    private int findMaxElevationSquareBFS(TreeNode currentTreeNode) {
+    private int findMaxElevationSquareBFS(TreeNode rootTreeNode) {
         Queue<TreeNode> queue = new LinkedList<>();
 
-        /*
-        // Trying to maintain a global map of explored positions instead of local ones through Square::isVisited flag
-        Map<Position, Boolean> exploredPosition = new HashMap<>();
-        Position exploringPosition = currentTreeNode.getCurrentSquare().position();
-        exploredPosition.put(exploringPosition, true);
-        */
 
-        queue.add(currentTreeNode);
+        // Trying to maintain a global map of explored positions instead of local ones through Node::getPath
+        //Map<Position, Boolean> exploredPosition = new HashMap<>();
+        //Position exploringPosition = rootTreeNode.getCurrentPosition();
+        //exploredPosition.put(exploringPosition, true);
+
+
+        queue.add(rootTreeNode);
         int count = 0;
         while (! queue.isEmpty()) {
             TreeNode node = queue.poll();
-            //System.out.println(count++ + " => CurrentTreeNode = " + node);
-            System.out.println(count++ + " :: Handling node with current square " + node.getCurrentSquare() + " at tree depth " + node.getDepth() + " with queue size of " + queue.size());
-            node.displayPathInConsole();
-            if (node.isAtTargetPosition()) {
+            System.out.println(count++ + " :: Handling node at " + node.getCurrentPosition() + " at tree depth " + node.getDepth() + " with queue size of " + queue.size());
+            //System.out.println("Tree from root is :\n" + rootTreeNode.displayTree(this.hillMap));
+            //displayPathInConsole(node);
+            if (isAtTargetPosition(node.getCurrentPosition())) {
                 System.out.println("Shortest path is in " + node.getDepth() + " steps");
-                node.displayPathInConsole();
+                displayPathInConsole(node);
                 return node.getDepth();
             }
-            List<Square> nextEligibleSquares = node.getNextEligibleSquares();
-            System.out.println("Adding " + nextEligibleSquares.size() + " new children to queue : " + nextEligibleSquares.stream().map(Square::position).toList());
+            List<Square> nextEligibleSquares = this.hillMap.getNextEligibleSquares(node.getCurrentPosition());
+            //System.out.println("Adding " + nextEligibleSquares.size() + " new children to queue : " + nextEligibleSquares.stream().map(Square::position).toList());
             for (Square nextEligibleSquare : nextEligibleSquares) {
                 //if (exploredPosition.get(nextEligibleSquare.position()) == null) {
-                  //  exploredPosition.put(nextEligibleSquare.position(), true);
-                    TreeNode child = node.addChild(nextEligibleSquare.position());
-                    queue.add(child);
+                //    exploredPosition.put(nextEligibleSquare.position(), true);
+                    if (!node.getPath().contains(nextEligibleSquare.position())) {
+                        TreeNode child = node.addChild(nextEligibleSquare.position());
+                        queue.add(child);
+                    }
                 //}
             }
         }
         return -1;
     }
 
-    private int findMaxElevationSquareBFSv2(TreeNode currentTreeNode) {
-        Graph graph = new Graph();
-        int maxColumnIndex = this.hillMap.getMaxColumnIndex();
-        int maxRowIndex = this.hillMap.getMaxRowIndex();
+    public void displayPathInConsole(TreeNode node) {
+        //System.out.println("Depth : " + node.getDepth());
+        //System.out.println(this.hillMap.getStartingPosition());
 
-        for (Square square : this.hillMap.getSquares()) {
-            //System.out.println("Handling : " + square.position());
-            for (Square adj : this.hillMap.getNextEligibleSquares(square.position(), maxColumnIndex, maxRowIndex)) {
-                //System.out.println("Adding edge to pos " + square.position() + " : " + adj.position());
-                graph.addEdge(square.position(), adj.position());
+        List<Position> path = node.getPath();
+        //System.out.println("Path size : " + path.size());
+        //System.out.println("Path : " + path);
+
+        StringBuilder display = new StringBuilder();
+        for (int y = 0; y <= this.hillMap.getMaxRowIndex(); y++) {
+            for (int x = 0; x <= this.hillMap.getMaxColumnIndex(); x++) {
+                int index = path.indexOf(new Position(x, y));
+                //System.out.println("x,y=" + x + "," + y + " => index in path : " + index);
+                if (index == -1) {
+                    display.append(".");
+                }
+                else {
+                    Position p = path.get(index);
+                    if (index == 0) {
+                        display.append("S");
+                    }
+                    else if (p.equals(this.hillMap.getTargetPosition())) {
+                        display.append("E");
+                    }
+                    else if (index == path.size() - 1) {
+                        display.append("?");
+                    }
+                    else {
+                        Move move = Move.from(p, path.get(index + 1));
+                        display.append(move.getSign());
+                    }
+                }
             }
+            display.append("\n");
         }
-        List<Position> path = graph.BFS(currentTreeNode.getCurrentSquare().position(), this.hillMap.getTargetPosition());
-        System.out.println("Path size is " + path.size());
-
-        return computeMinStepFromTargetToStartingPoint(graph, path.get(path.size() - 1));
-    }
-
-    private int computeMinStepFromTargetToStartingPoint(Graph graph, Position position) {
-        int minStepFromTargetToStartingPoint = Integer.MAX_VALUE;
-        System.out.println(position + " -> parents : " + graph.getParentPositions(position));
-        if (position.equals(this.hillMap.getCurrentSquare().position())) {
-            return minStepFromTargetToStartingPoint;
-        }
-        for (Position parent : graph.getParentPositions(position)) {
-            if (graph.getParentPositions(position).contains(parent))
-                continue;
-            minStepFromTargetToStartingPoint = Math.min(minStepFromTargetToStartingPoint, computeMinStepFromTargetToStartingPoint(graph, parent));
-        }
-        return minStepFromTargetToStartingPoint;
+        System.out.println(display);
     }
 }
