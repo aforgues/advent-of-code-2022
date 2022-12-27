@@ -90,14 +90,14 @@ public class Cave {
                 throwOneSandUnit();
                 nbSandUnit++;
             }
-        } catch (SandUnitFallingInTheVoidException e) {
+        } catch (SandUnitFallingInTheVoidException | SandUnitBlockingSourceOfSandException e) {
             System.out.println(e.getMessage());
         }
 
         return nbSandUnit;
     }
 
-    private void throwOneSandUnit() throws SandUnitFallingInTheVoidException {
+    private void throwOneSandUnit() throws SandUnitFallingInTheVoidException, SandUnitBlockingSourceOfSandException {
         SandUnit sandUnit = new SandUnit(this.sandSourcePosition);
         sandUnits.add(sandUnit);
         //displayInConsole();
@@ -112,10 +112,12 @@ public class Cave {
                 Position belowLeftSandUnit = new Position(sandUnit.getPosition().x() - 1, sandUnit.getPosition().y() + 1);
                 if (this.isBlockedByRock(belowLeftSandUnit) || this.isBlockedBySand(belowLeftSandUnit)) {
 
-                    // try right diagonnally
+                    // try right diagonally
                     Position belowRightSandUnit = new Position(sandUnit.getPosition().x() + 1, sandUnit.getPosition().y() + 1);
                     if (this.isBlockedByRock(belowRightSandUnit) || this.isBlockedBySand(belowRightSandUnit)) {
                         sandUnit.rest();
+                        if (sandUnit.getPosition().equals(this.sandSourcePosition))
+                            throw new SandUnitBlockingSourceOfSandException("Ahhhhhh !!! SandUnit " + sandUnit.getPosition() + " is blocking source of sand !!");
                     }
                     else {
                         sandUnit.fallRight();
@@ -135,5 +137,11 @@ public class Cave {
         } while (sandUnit.isMoving());
 
         //displayInConsole();
+    }
+
+    public void addFloor() {
+        RockPath floor = new RockPath(List.of(new Shape(new Position(this.computeMinXFromRockPaths() - this.computeMaxYFromRockPaths()*2, this.computeMaxYFromRockPaths() + 2),
+                                                        new Position(this.computeMaxXFromRockPaths() + this.computeMaxYFromRockPaths()*2, this.computeMaxYFromRockPaths() + 2))));
+        this.rockPaths.add(floor);
     }
 }

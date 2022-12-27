@@ -17,14 +17,18 @@ public class RegolithReservoirApp {
 
         // First exercise
         app.computeScore();
+
+        // Second exercise
+        app.computeScoreV2();
     }
 
     private final String filePath;
     private final List<RockPath> rockPaths;
 
-    public RegolithReservoirApp(String filePath) {
+    public RegolithReservoirApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
         this.rockPaths = new ArrayList<>();
+        this.parseFile();
     }
 
     private void parseFile() throws FileNotFoundException {
@@ -51,14 +55,25 @@ public class RegolithReservoirApp {
         return new RockPath(shapes);
     }
 
-    private void computeScore() throws FileNotFoundException {
-        this.parseFile();
-
+    private void computeScore() {
         Cave cave = new Cave(this.rockPaths, new Position(500, 0));
         cave.displayInConsole();
         int score = cave.throwSandUnits();
         cave.displayInConsole();
 
         System.out.println("Score : " + score);
+    }
+
+    private void computeScoreV2() {
+        Cave cave = new Cave(this.rockPaths, new Position(500, 0));
+        cave.displayInConsole();
+
+        // add extra rockPath as a floor below
+        cave.addFloor();
+
+        int score = cave.throwSandUnits();
+        cave.displayInConsole();
+
+        System.out.println("Score : " + (score + 1));
     }
 }
