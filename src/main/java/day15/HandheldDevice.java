@@ -2,9 +2,7 @@ package day15;
 
 import day09.Position;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class HandheldDevice {
     private final List<Sensor> sensors;
@@ -108,17 +106,31 @@ public class HandheldDevice {
     }
 
     public void computeSensorsExclusionZones(int row) {
-        for (Sensor sensor : this.sensors) {
-            //System.out.println("Sensor : " + sensor);
-            this.computeSensorExclusionZone(sensor, row);
-            //this.displayInConsole();
-        }
-        this.sensors.stream().map(Sensor::position).toList().forEach(this.unreachableBeaconPositions::remove);
-        this.sensors.stream().map(s -> s.closestBeacon().position()).toList().forEach(this.unreachableBeaconPositions::remove);
+        this.unreachableBeaconPositions.addAll(simulateUnreachableBeaconPositionsAtRow(row));
+        this.sensors.stream().map(Sensor::position).toList().forEach(unreachableBeaconPositions::remove);
+        this.sensors.stream().map(s -> s.closestBeacon().position()).toList().forEach(unreachableBeaconPositions::remove);
     }
 
-    private void computeSensorExclusionZone(Sensor sensor, int row) {
-        this.unreachableBeaconPositions.addAll(sensor.getUnreachableBeaconPositions(row));
+    private Set<Position> simulateUnreachableBeaconPositionsAtRow(int row) {
+        Set<Position> unreachableBeaconPositionsAtRow = Collections.synchronizedSet(new HashSet<>());
+        this.sensors.parallelStream().forEach(sensor -> unreachableBeaconPositionsAtRow.addAll(sensor.getUnreachableBeaconPositions(row)));
+        /*for (Sensor sensor : this.sensors) {
+            //System.out.println("Sensor : " + sensor);
+            unreachableBeaconPositionsAtRow.addAll(sensor.getUnreachableBeaconPositions(row));
+            //this.displayInConsole();
+        }*/
+        return unreachableBeaconPositionsAtRow;
+    }
+
+    public Optional<Position> searchDistressBeaconAtRow(int row, int minX, int maxX) {
+        Set<Position> potentialDistressBeaconPositions = new HashSet<>();
+        Set<Position> unreachableBeaconPositionsAtRow = simulateUnreachableBeaconPositionsAtRow(row);
+        for (int x = minX; x <= maxX; x++) {
+            Position pos = new Position(x, row);
+            if (! unreachableBeaconPositionsAtRow.contains(pos))
+                potentialDistressBeaconPositions.add(pos);
+        }
+        return potentialDistressBeaconPositions.stream().findFirst();
     }
 
     public long countUnreachableBeaconPositionAtRow(int row) {
