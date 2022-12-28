@@ -16,4 +16,5 @@ Here are the puzzle pitches :
 - [Day 12 - Hill Climbing Algorithm](./docs/day12.md) 💥
 - [Day 13 - Distress Signal](./docs/day13.md) ⭐💥
 - [Day 14 - Regolith Reservoir](./docs/day14.md) ⭐⭐
+- [Day 15 - Beacon Exclusion Zone](./docs/day15.md)
 - [Day 18 - Boiling Boulders](./docs/day18.md) ⭐💥
