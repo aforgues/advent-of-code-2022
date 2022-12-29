@@ -8,7 +8,7 @@ import java.util.List;
 public record Sensor(Position position, Beacon closestBeacon) {
     public List<Position> getUnreachableBeaconPositions(int row) {
         List<Position> positions = new ArrayList<>();
-        int distance = manathanDistance(this.position(), this.closestBeacon().position());
+        int distance = getDistanceFromClosestBeacon();
         //System.out.println("distance : " + distance);
 
         if (row >= (position.y() - distance) && row <= position.y() + distance) {
@@ -26,7 +26,11 @@ public record Sensor(Position position, Beacon closestBeacon) {
         return positions;
     }
 
-    private static int manathanDistance(Position p1, Position p2) {
+    public static int manathanDistance(Position p1, Position p2) {
         return Math.abs(p1.x() - p2.x()) + Math.abs(p1.y() - p2.y());
+    }
+
+    public int getDistanceFromClosestBeacon() {
+        return manathanDistance(this.position, this.closestBeacon.position());
     }
 }

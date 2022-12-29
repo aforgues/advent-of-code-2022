@@ -4,25 +4,23 @@ import day09.Position;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class BeaconExclusionZoneApp {
 
     public static void main(String[] args) throws FileNotFoundException {
-        //String path = "src/main/resources/day15/puzzle_input.txt";
-        String path = "src/main/resources/day15/puzzle_input_test.txt";
+        String path = "src/main/resources/day15/puzzle_input.txt";
+        //String path = "src/main/resources/day15/puzzle_input_test.txt";
         BeaconExclusionZoneApp app = new BeaconExclusionZoneApp(path);
 
         // First part
         app.computeScore();
 
         // Second part
-        app.computeScoreV2();
+        //app.computeScoreV2();
+        app.computeScoreV2_2();
     }
 
     private final String filePath;
@@ -67,8 +65,8 @@ public class BeaconExclusionZoneApp {
     }
 
     private void computeScore() {
-        int rowToAnalyse = 10;
-        //int rowToAnalyse = 2000000;
+        //int rowToAnalyse = 10;
+        int rowToAnalyse = 2000000;
 
         //device.displayInConsole();
         this.device.computeSensorsExclusionZones(rowToAnalyse);
@@ -79,10 +77,11 @@ public class BeaconExclusionZoneApp {
         System.out.println("Score : " + score);
     }
 
+    // Brute force solution that need lot of time of computation (it works for the example, but I did not wait long enough for the target puzzle input)
     private void computeScoreV2() {
         final int minX = 0;
-        final int maxX = 20;
-        //final int maxX = 4000000;
+        //final int maxX = 20;
+        final int maxX = 4000000;
         AtomicInteger count = new AtomicInteger(0);
         IntStream.rangeClosed(minX, maxX).parallel().forEach(row -> {
             //for (int row = minX; row <= maxX; row++) {
@@ -97,4 +96,17 @@ public class BeaconExclusionZoneApp {
             System.out.println("Already explored " + currentCount + " over " + maxX + " rows : " + (Integer.valueOf(currentCount).doubleValue()/maxX)*100 + "%");
         });
     }
+
+    private void computeScoreV2_2() {
+        final int minX = 0;
+        //final int maxX = 20;
+        final int maxX = 4000000;
+
+        this.device.computeSensorsPotentialDistressBeaconPositions(minX, maxX);
+        //this.device.displayInConsole();
+        Position distressBeaconPosition = this.device.searchDistressBeaconPosition();
+        System.out.println("Distress beacon found at " + distressBeaconPosition);
+        System.out.println("Tuning frequency is : " + (distressBeaconPosition.x() * 4000000L + distressBeaconPosition.y()));
+    }
+
 }

@@ -3,14 +3,18 @@ package day15;
 import day09.Position;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HandheldDevice {
     private final List<Sensor> sensors;
     private final Set<Position> unreachableBeaconPositions;
+    private final Set<Position> potentialDistressBeaconPositions;
 
     public HandheldDevice(List<Sensor> sensors) {
         this.sensors = sensors;
         this.unreachableBeaconPositions = new HashSet<>();
+        this.potentialDistressBeaconPositions = Collections.synchronizedSet(new HashSet<>());
+
     }
 
     public void displayInConsole() {
@@ -34,6 +38,9 @@ public class HandheldDevice {
                 else if (this.matchWithUnreachableBeaconPosition(pos)) {
                     sb.append("#");
                 }
+                else if (this.matchWithPotentialDistressBeaconPosition(pos)) {
+                    sb.append("P");
+                }
                 else {
                     sb.append(".");
                 }
@@ -43,6 +50,10 @@ public class HandheldDevice {
 
         System.out.println(sb);
 
+    }
+
+    private boolean matchWithPotentialDistressBeaconPosition(Position pos) {
+        return this.potentialDistressBeaconPositions.stream().anyMatch(position -> position.equals(pos));
     }
 
     private boolean matchWithSensor(Position pos) {
@@ -107,8 +118,8 @@ public class HandheldDevice {
 
     public void computeSensorsExclusionZones(int row) {
         this.unreachableBeaconPositions.addAll(simulateUnreachableBeaconPositionsAtRow(row));
-        this.sensors.stream().map(Sensor::position).toList().forEach(unreachableBeaconPositions::remove);
-        this.sensors.stream().map(s -> s.closestBeacon().position()).toList().forEach(unreachableBeaconPositions::remove);
+        this.sensors.stream().map(Sensor::position).toList().forEach(this.unreachableBeaconPositions::remove);
+        this.sensors.stream().map(s -> s.closestBeacon().position()).toList().forEach(this.unreachableBeaconPositions::remove);
     }
 
     private Set<Position> simulateUnreachableBeaconPositionsAtRow(int row) {
@@ -122,6 +133,15 @@ public class HandheldDevice {
         return unreachableBeaconPositionsAtRow;
     }
 
+    public long countUnreachableBeaconPositionAtRow(int row) {
+        return this.unreachableBeaconPositions.stream()
+                .filter(position -> position.y() == row)
+                .count();
+    }
+
+    // PART 2 - First implementation based on part 1 (need to explore every 4000000 rows)
+    //-----------------------------------------------------------------------------------
+
     public Optional<Position> searchDistressBeaconAtRow(int row, int minX, int maxX) {
         Set<Position> potentialDistressBeaconPositions = new HashSet<>();
         Set<Position> unreachableBeaconPositionsAtRow = simulateUnreachableBeaconPositionsAtRow(row);
@@ -133,9 +153,74 @@ public class HandheldDevice {
         return potentialDistressBeaconPositions.stream().findFirst();
     }
 
-    public long countUnreachableBeaconPositionAtRow(int row) {
-        return this.unreachableBeaconPositions.stream()
-                .filter(position -> position.y() == row)
-                .count();
+    // PART 2 - Second implementation based on much explicit targeted potential positions
+    //-----------------------------------------------------------------------------------
+
+    public void computeSensorsPotentialDistressBeaconPositions(int minCoordinate, int maxCoordinate) {
+        this.sensors.parallelStream().forEach(sensor -> this.potentialDistressBeaconPositions.addAll(this.computePotentialDistressBeaconPositionAroundSensor(sensor, minCoordinate, maxCoordinate)));
+        this.sensors.stream().map(Sensor::position).toList().forEach(this.potentialDistressBeaconPositions::remove);
+        this.sensors.stream().map(s -> s.closestBeacon().position()).toList().forEach(this.potentialDistressBeaconPositions::remove);
+    }
+
+    public Position searchDistressBeaconPosition() {
+        AtomicReference<Position> distressBeaconPosition = new AtomicReference<>();
+        this.potentialDistressBeaconPositions.parallelStream().forEach(potentialDistressBeaconPosition -> {
+                // check intersection with all sensors exclusion zone, using distance and not list of exclusion zone positions
+                boolean found = this.sensors.stream().allMatch(sensor -> Sensor.manathanDistance(potentialDistressBeaconPosition, sensor.position()) > sensor.getDistanceFromClosestBeacon());
+                if (found) {
+                    distressBeaconPosition.set(potentialDistressBeaconPosition);
+                    //System.out.println("Found Distress signal : " + potentialDistressBeaconPosition);
+                }
+        });
+        return distressBeaconPosition.get();
+    }
+
+
+    /*
+       If the sensor S is at a distance D (2 in example below) from its closest beacon B, then :
+         - all the unreachable positions (marked as #) are at a max distance of D
+         - all the potential distress beacon positions (marked as P below) are at D+1 (3)
+
+       .....P.....
+       ....P#P....
+       ...P###P...
+       ..P##S##P..
+       ...PB##P...
+       ....P#P....
+       .....P.....
+     */
+    private List<Position> computePotentialDistressBeaconPositionAroundSensor(Sensor sensor, int minCoordinate, int maxCoordinate) {
+        List<Position> potentialDistressBeaconPositions = new ArrayList<>();
+        int radius = sensor.getDistanceFromClosestBeacon() + 1;
+
+        // Let's start at the top
+        int x = sensor.position().x();
+        int y = sensor.position().y() - radius;
+
+        // Go down to the right and then to the bottom
+        while (y < (sensor.position().y() + radius)) {
+            // filter on Distress signal predefined zone (minCoordinate, maxCoordinate)
+            if (x >= minCoordinate && x <= maxCoordinate && y >= minCoordinate && y <= maxCoordinate)
+                potentialDistressBeaconPositions.add(new Position(x, y));
+            if (y < sensor.position().y())
+                x++;
+            else
+                x--;
+            y++;
+        }
+
+        // Go up to the left then to the top
+        while (y > (sensor.position().y() - radius)) {
+            // filter on Distress signal predefined zone (minCoordinate, maxCoordinate)
+            if (x >= minCoordinate && x <= maxCoordinate && y >= minCoordinate && y <= maxCoordinate)
+                potentialDistressBeaconPositions.add(new Position(x, y));
+            if (y > sensor.position().y())
+                x--;
+            else
+                x++;
+            y--;
+        }
+
+        return potentialDistressBeaconPositions;
     }
 }
