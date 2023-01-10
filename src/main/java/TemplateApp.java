@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.Scanner;
 
 public class TemplateApp {
@@ -32,8 +33,12 @@ public class TemplateApp {
     }
 
     private void computeScore() {
+        Instant start = Instant.now();
+
         int score = 0;
 
-        System.out.println("Score : " + score);
+        Instant end = Instant.now();
+
+        System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 }

@@ -2,13 +2,14 @@ package day16;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ProboscideaVolcaniumApp {
 
-    private static final boolean TEST = false;
+    public static final boolean TEST = false;
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = TEST ? "src/main/resources/day16/puzzle_input_test.txt" : "src/main/resources/day16/puzzle_input.txt";
@@ -16,6 +17,9 @@ public class ProboscideaVolcaniumApp {
 
         // First part
         app.computeScore();
+
+        // Second part
+        //app.computeScoreV2();
     }
 
     private final String filePath;
@@ -40,10 +44,21 @@ public class ProboscideaVolcaniumApp {
     }
 
     private void computeScore() {
-        TunnelWalkthrough tunnelWalkthrough = new TunnelWalkthrough(this.valves, 30);
+        Instant start = Instant.now();
+
+        TunnelWalkthrough tunnelWalkthrough = new TunnelWalkthrough(this.valves, 30, false);
         //int score = tunnelWalkthrough.exploreBFS("AA");
         int score = tunnelWalkthrough.exploreDFS("AA");
 
-        System.out.println("Score : " + score);
+        Instant end = Instant.now();
+        System.out.println("Score part 1 : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+    }
+
+    private void computeScoreV2() {
+        TunnelWalkthrough tunnelWalkthrough = new TunnelWalkthrough(this.valves, 26, true);
+        //int score = tunnelWalkthrough.exploreBFS("AA");
+        int score = tunnelWalkthrough.exploreDFS("AA");
+
+        System.out.println("Score part 2: " + score);
     }
 }
