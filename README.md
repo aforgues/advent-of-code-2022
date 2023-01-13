@@ -18,4 +18,5 @@ Here are the puzzle pitches :
 - [Day 14 - Regolith Reservoir](./docs/day14.md) ⭐⭐
 - [Day 15 - Beacon Exclusion Zone](./docs/day15.md) ⭐⭐
 - [Day 16 - Proboscodea Volcanium](./docs/day16.md) ⭐💥
+- [Day 17 - Pyroclastic Flow](./docs/day17.md) ⭐
 - [Day 18 - Boiling Boulders](./docs/day18.md) ⭐💥
