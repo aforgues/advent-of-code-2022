@@ -9,14 +9,17 @@ import java.util.Scanner;
 
 public class PyroclasticFlowApp {
 
-    private static final boolean TEST = false;
+    private static final boolean TEST = true;
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = TEST ? "src/main/resources/day17/puzzle_input_test.txt" : "src/main/resources/day17/puzzle_input.txt";
         PyroclasticFlowApp app = new PyroclasticFlowApp(path);
 
         // First part
-        app.computeScore();
+        app.computeScore(2022);
+
+        // Second part
+        app.computeScore(1000000000000L);
     }
 
     private final String filePath;
@@ -42,12 +45,12 @@ public class PyroclasticFlowApp {
         }
     }
 
-    private void computeScore() {
+    private void computeScore(long nbRockFalling) {
         Instant start = Instant.now();
 
         Chamber chamber = new Chamber(7, this.gasJets);
 
-        int score = chamber.runRocksFallingWithGasJets(2022);
+        long score = chamber.runRocksFallingWithGasJets(nbRockFalling);
         chamber.displayInConsole();
 
         Instant end = Instant.now();

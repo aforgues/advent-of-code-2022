@@ -1,7 +1,5 @@
 package day17;
 
-import day09.Position;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -16,7 +14,7 @@ public class Chamber {
     private final List<GasJet> gasJets;
     private Iterator<GasJet> gasJetIterator;
     private List<Rock> rocks;
-    private int highestStoppedRockLevel;
+    private long highestStoppedRockLevel;
 
     public Chamber(int size, List<GasJet> gasJets) {
         this.size = size;
@@ -27,7 +25,7 @@ public class Chamber {
         this.highestStoppedRockLevel = -1;
     }
 
-    public int runRocksFallingWithGasJets(int nbRockFalling) {
+    public long runRocksFallingWithGasJets(long nbRockFalling) {
         Iterator<RockType> rockTypeIterator = Arrays.stream(RockType.values()).iterator();
         while (rockTypeIterator.hasNext()) {
             RockType type = rockTypeIterator.next();
@@ -37,6 +35,8 @@ public class Chamber {
             // do a circular
             if (! rockTypeIterator.hasNext())
                 rockTypeIterator = Arrays.stream(RockType.values()).iterator();
+
+            System.out.println("Rock #" + (this.rocks.size() + 1) + " => " + (double)(this.rocks.size() + 1)/nbRockFalling*100 + "%");
 
             if (this.rocks.size() == nbRockFalling + 1) // because of the floor
                 break;
@@ -54,12 +54,12 @@ public class Chamber {
         }
     }
 
-    private int computeHighestLevel() {
-        return this.rocks.stream().map(Rock::positions).flatMap(List::stream).map(Position::y).reduce(0, Integer::max);
+    private long computeHighestLevel() {
+        return this.rocks.stream().map(Rock::positions).flatMap(List::stream).map(BigPosition::y).reduce(0L, Long::max);
     }
 
     private void recomputeHighestStoppedRockLevel() {
-        this.highestStoppedRockLevel = this.rocks.stream().filter(rock -> rock.status() == RockStatus.STOPPED).map(Rock::positions).flatMap(List::stream).map(Position::y).reduce(this.highestStoppedRockLevel, Integer::max);
+        this.highestStoppedRockLevel = this.rocks.stream().filter(rock -> rock.status() == RockStatus.STOPPED).map(Rock::positions).flatMap(List::stream).map(BigPosition::y).reduce(this.highestStoppedRockLevel, Long::max);
         if (DEBUG)
             System.out.println("Recomputed highest stopped rock level : " + this.highestStoppedRockLevel);
     }
@@ -75,31 +75,28 @@ public class Chamber {
                     if (DEBUG)
                         System.out.println("Jet of gas pushes rock " + (gasJet == GasJet.PUSH_LEFT ? "left" : "right"));
                     rock.shift(gasJet);
-                    if (DEBUG)
-                        this.displayInConsole();
                 }
                 else {
                     if (DEBUG) {
                         System.out.println("Jet of gas pushes rock " + (gasJet == GasJet.PUSH_LEFT ? "left" : "right") + ", but nothing happens ");
-                        this.displayInConsole();
                     }
                 }
+                if (DEBUG)
+                    this.displayInConsole();
 
                 // - Then falling one unit down
                 if (canRockFall(rock)) {
                     if (DEBUG)
                         System.out.println("Rock falls 1 unit");
                     rock.fall();
-                    if (DEBUG)
-                        this.displayInConsole();
                 } else {
                     if (DEBUG)
                         System.out.println("Rock falls 1 unit, causing it to come to rest");
                     rock.stop();
                     this.recomputeHighestStoppedRockLevel();
-                    if (DEBUG)
-                        this.displayInConsole();
                 }
+                if (DEBUG)
+                    this.displayInConsole();
             } while (rock.status() == RockStatus.MOVING);
         });
     }
@@ -113,7 +110,7 @@ public class Chamber {
     }
 
     private boolean canRockShift(Rock rock, GasJet gasJet) {
-        List<Position> nextRockShiftedPositions = rock.simulateNextShiftedPositions(gasJet);
+        List<BigPosition> nextRockShiftedPositions = rock.simulateNextShiftedPositions(gasJet);
 
         // check collision with walls
         long collisionsWithWall = nextRockShiftedPositions.stream().filter(position -> position.x() < 0 || position.x() >= this.size).count();
@@ -125,7 +122,7 @@ public class Chamber {
     }
 
     private boolean canRockFall(Rock rock) {
-        int minY = rock.computeLowestLevel() - 1;
+        long minY = rock.computeLowestLevel() - 1;
         if (minY > this.highestStoppedRockLevel)
             return true;
 
@@ -133,10 +130,10 @@ public class Chamber {
         return checkNoCollisionWithStoppedRock(rock.simulateNextFallingPositions());
     }
 
-    private boolean checkNoCollisionWithStoppedRock(List<Position> nextRockPositions) {
+    private boolean checkNoCollisionWithStoppedRock(List<BigPosition> nextRockPositions) {
         // check collision with stopped rocks
         List<Rock> stoppedRocks = this.rocks.stream().filter(r -> r.status() == RockStatus.STOPPED).toList();
-        for (Position position : nextRockPositions) {
+        for (BigPosition position : nextRockPositions) {
             if (stoppedRocks.stream().map(Rock::positions).flatMap(List::stream).filter(p -> p.y() == position.y()).anyMatch(p -> p.equals(position)))
                 return false;
         }
@@ -147,10 +144,10 @@ public class Chamber {
     public void displayInConsole() {
         StringBuilder sb = new StringBuilder();
 
-        for (int y = this.computeHighestLevel(); y >= 0; y--) {
+        for (long y = this.computeHighestLevel(); y >= 0; y--) {
             sb.append("|");
             for (int x = 0; x < this.size; x++) {
-                Position position = new Position(x, y);
+                BigPosition position = new BigPosition(x, y);
                 Rock rock = matchWithRock(position);
                 if (rock != null) {
                     switch (rock.status()) {
@@ -172,7 +169,7 @@ public class Chamber {
         System.out.println(sb);
     }
 
-    private Rock matchWithRock(Position currentPosition) {
+    private Rock matchWithRock(BigPosition currentPosition) {
         return this.rocks.stream().filter(rock -> rock.positions().contains(currentPosition)).findFirst().orElse(null);
     }
 }
