@@ -1,9 +1,6 @@
 package day19;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TreeNode {
     private static final boolean DEBUG = false;
@@ -15,23 +12,27 @@ public class TreeNode {
     private Map<MineralType, Integer> collectingRobotsByType;
     private Map<MineralType, Integer> collectedMineralsByType;
 
+    private MineralType mineralTypeToBuild;
+
     public int getCurrentMinutes() {
         return this.currentMinute;
     }
 
-    public TreeNode(int currentMinute, TreeNode parent, Map<MineralType, Integer> collectingRobotsByType, Map<MineralType, Integer> collectedMineralsByType) {
+    public TreeNode(int currentMinute, TreeNode parent, Map<MineralType, Integer> collectingRobotsByType, Map<MineralType, Integer> collectedMineralsByType, MineralType mineralTypeToBuild) {
         this.currentMinute = currentMinute;
         this.parent = parent;
         this.children = new ArrayList<>();
         this.collectingRobotsByType = collectingRobotsByType;
         this.collectedMineralsByType = collectedMineralsByType;
+        this.mineralTypeToBuild = mineralTypeToBuild;
     }
 
-    public TreeNode addChild() {
+    public TreeNode addChild(MineralType mineralTypeToBuildForChild) {
         Map<MineralType, Integer> childCollectingRobotsByType = new HashMap<>(this.collectingRobotsByType);
         Map<MineralType, Integer> childCollectedMineralsByType = new HashMap<>(this.collectedMineralsByType);
 
-        TreeNode child = new TreeNode(this.currentMinute + 1, this, childCollectingRobotsByType, childCollectedMineralsByType);
+        TreeNode child = new TreeNode(this.currentMinute + 1, this, childCollectingRobotsByType, childCollectedMineralsByType, mineralTypeToBuildForChild);
+
         this.children.add(child);
         return child;
     }
@@ -51,35 +52,42 @@ public class TreeNode {
 
         // - check ore collecting robot
         int collectedOre = this.getCollectedMineralByType(MineralType.ORE);
-        if (this.needToBuildCollectingRobot(MineralType.ORE) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.ORE).costByMineralType().get(MineralType.ORE))
+        if (this.needToBuildCollectingRobot(MineralType.ORE, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.ORE).costByMineralType().get(MineralType.ORE))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.ORE);
 
         // - check clay collecting robot
-        if (this.needToBuildCollectingRobot(MineralType.CLAY) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.CLAY).costByMineralType().get(MineralType.ORE))
+        if (this.needToBuildCollectingRobot(MineralType.CLAY, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.CLAY).costByMineralType().get(MineralType.ORE))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.CLAY);
 
         // - check obsidian collecting robot
         int collectedClay = this.getCollectedMineralByType(MineralType.CLAY);
-        if (this.needToBuildCollectingRobot(MineralType.OBSIDIAN) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.ORE)
+        if (this.needToBuildCollectingRobot(MineralType.OBSIDIAN, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.ORE)
                 && collectedClay >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.CLAY))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.OBSIDIAN);
 
         // - check geode collecting robot
         int collectedObsidian = this.getCollectedMineralByType(MineralType.OBSIDIAN);
-        if (this.needToBuildCollectingRobot(MineralType.GEODE) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.ORE)
+        if (this.needToBuildCollectingRobot(MineralType.GEODE, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.ORE)
                 && collectedObsidian >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.OBSIDIAN))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.GEODE);
+
+        // Heuristic 4 : if we can build geode, only build geode
+        if (eligibleMineralTypeOfCollectingRobotToBuild.contains(MineralType.GEODE))
+            return List.of(MineralType.GEODE);
 
         return eligibleMineralTypeOfCollectingRobotToBuild;
     }
 
-    private boolean needToBuildCollectingRobot(MineralType type) {
-        return switch(type) {
-            case ORE -> this.getCollectedMineralByType(MineralType.CLAY) == 0;
-            case CLAY -> this.getCollectedMineralByType(MineralType.OBSIDIAN) == 0;
-            case OBSIDIAN -> this.getCollectedMineralByType(MineralType.GEODE) == 0;
-            case GEODE -> true;
-        };
+    private boolean needToBuildCollectingRobot(MineralType type, Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
+        // Heuristic 3 : don't build robot above the max cost of its mineral type
+        if (type == MineralType.GEODE)
+            return true;
+        int maxCost = collectingRobotsByMineralTypeBlueprint.values().stream()
+                                .map(collectingRobot -> collectingRobot.costByMineralType().get(type) != null
+                                                        ? collectingRobot.costByMineralType().get(type)
+                                                        : 0)
+                                .reduce(0, Integer::max);
+        return this.getCollectingRobotByType(type) < maxCost;
     }
 
     public void removeChild(TreeNode child) {
@@ -105,7 +113,18 @@ public class TreeNode {
         return newCollectedMineral;
     }
 
-    public void collectMinerals() {
+    public void buildRobotAndCollect(Map<MineralType, CollectingRobot> collectingRobotsByMineralType) {
+        // First spend minerals to start building robot considering given mineralTypeRobotToBuild (if applicable)
+        this.startBuildingRobot(collectingRobotsByMineralType);
+
+        // Then collect with current building robots
+        this.collectMinerals();
+
+        // Finally, add the newly built robot (if applicable)
+        this.endBuildingRobot();
+    }
+
+    private void collectMinerals() {
         //if (DEBUG)
         //    System.out.println("Start collecting minerals with current collecting robots " + this.collectingRobotsByType);
         for (MineralType mineralType : MineralType.values()) {
@@ -118,41 +137,45 @@ public class TreeNode {
         }
     }
 
-    public void startBuildingRobot(CollectingRobot collectingRobot) {
-        //if (DEBUG)
-        //    System.out.println("Start building collecting-robot for " + collectingRobot.mineralType());
-        if (DEBUG)
-            System.out.println("Spend " + collectingRobot.costByMineralType() + " to start building a " + collectingRobot.mineralType() + "-collection robot");
-        for (MineralType mineralType : collectingRobot.costByMineralType().keySet()) {
-            int nbCollectedMineral = this.getCollectedMineralByType(mineralType);
-            if (nbCollectedMineral < collectingRobot.costByMineralType().get(mineralType)) {
-                throw new IllegalStateException("Not enough minerals " + nbCollectedMineral + " " + mineralType + " to start building " + collectingRobot.mineralType() + " collection-robot");
-            }
-            else {
-                int remainingCollectedMineral = this.addCollectedMineralByType(mineralType, -1*collectingRobot.costByMineralType().get(mineralType));
-                //if (DEBUG)
-                //    System.out.println("Now remaining only " + remainingCollectedMineral + " " + mineralType);
+    private void startBuildingRobot(Map<MineralType, CollectingRobot> collectingRobotByMineralType) {
+        if (this.mineralTypeToBuild != null) {
+            CollectingRobot collectingRobot = collectingRobotByMineralType.get(this.mineralTypeToBuild);
+            //if (DEBUG)
+            //    System.out.println("Start building collecting-robot for " + collectingRobot.mineralType());
+            if (DEBUG)
+                System.out.println("Spend " + collectingRobot.costByMineralType() + " to start building a " + collectingRobot.mineralType() + "-collection robot");
+            for (MineralType mineralType : collectingRobot.costByMineralType().keySet()) {
+                int nbCollectedMineral = this.getCollectedMineralByType(mineralType);
+                if (nbCollectedMineral < collectingRobot.costByMineralType().get(mineralType)) {
+                    throw new IllegalStateException("Not enough minerals " + nbCollectedMineral + " " + mineralType + " to start building " + collectingRobot.mineralType() + " collection-robot");
+                } else {
+                    int remainingCollectedMineral = this.addCollectedMineralByType(mineralType, -1 * collectingRobot.costByMineralType().get(mineralType));
+                    //if (DEBUG)
+                    //    System.out.println("Now remaining only " + remainingCollectedMineral + " " + mineralType);
+                }
             }
         }
     }
 
-    public void endBuildingRobot(MineralType mineralTypeRobotToBuild) {
-        //if (DEBUG)
-        //    System.out.println("End building collecting-robot for " + mineralTypeRobotToBuild);
-        Integer nbCollectingRobots = this.collectingRobotsByType.get(mineralTypeRobotToBuild);
-        int newCollectingRobotNb = 1;
-        if (nbCollectingRobots != null) {
-            newCollectingRobotNb += nbCollectingRobots;
+    private void endBuildingRobot() {
+        if (this.mineralTypeToBuild != null) {
+            //if (DEBUG)
+            //    System.out.println("End building collecting-robot for " + this.mineralTypeToBuild);
+            Integer nbCollectingRobots = this.collectingRobotsByType.get(this.mineralTypeToBuild);
+            int newCollectingRobotNb = 1;
+            if (nbCollectingRobots != null) {
+                newCollectingRobotNb += nbCollectingRobots;
+            }
+            this.collectingRobotsByType.put(this.mineralTypeToBuild, newCollectingRobotNb);
+            if (DEBUG)
+                System.out.println("The new " + this.mineralTypeToBuild + "-collecting robot is ready; you now have " + newCollectingRobotNb + " of them.");
         }
-        this.collectingRobotsByType.put(mineralTypeRobotToBuild, newCollectingRobotNb);
-        if (DEBUG)
-            System.out.println("The new " + mineralTypeRobotToBuild + "-collecting robot is ready; you now have " + newCollectingRobotNb + " of them.");
     }
 
     public String stats() {
-        String sb = "##### Minute " + this.currentMinute +
+        return "##### Minute " + this.currentMinute +
                 " - buildingRobots : " + this.collectingRobotsByType +
-                " - collected minerals : " + this.collectedMineralsByType;
-        return sb;
+                " - collected minerals : " + this.collectedMineralsByType +
+                " - mineralType to build : " + this.mineralTypeToBuild;
     }
 }
