@@ -20,4 +20,4 @@ Here are the puzzle pitches :
 - [Day 16 - Proboscodea Volcanium](./docs/day16.md) ⭐💥
 - [Day 17 - Pyroclastic Flow](./docs/day17.md) ⭐💥
 - [Day 18 - Boiling Boulders](./docs/day18.md) ⭐💥
-- [Day 18 - Not Enough Minerals](./docs/day19.md) ⭐⭐
+- [Day 19 - Not Enough Minerals](./docs/day19.md) ⭐⭐
