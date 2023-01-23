@@ -5,12 +5,13 @@ import java.util.Map;
 
 public class BlueprintExplorer {
     private final Blueprint blueprint;
-    private static final int MAX_MINUTES = 24;
+    private final int nbMaxMinutes;
 
     private long nbNodeExplored = 0;
 
-    public BlueprintExplorer(Blueprint blueprint) {
+    public BlueprintExplorer(Blueprint blueprint, int nbMaxMinutes) {
         this.blueprint = blueprint;
+        this.nbMaxMinutes = nbMaxMinutes;
     }
 
     public int explore() {
@@ -27,11 +28,11 @@ public class BlueprintExplorer {
         //System.out.println(node.stats());
         node.buildRobotAndCollect(this.blueprint.collectingRobotsByMineralType());
 
-        if (node.getCurrentMinutes() == MAX_MINUTES) {
+        if (node.getCurrentMinutes() == this.nbMaxMinutes) {
             return node.getCollectedGeodeCount();
         }
 
-        for (MineralType mineralTypeToBuild : node.getEligibleMineralTypeOfCollectingRobotToBuild(this.blueprint.collectingRobotsByMineralType())) {
+        for (MineralType mineralTypeToBuild : node.getMineralTypeOfCollectingRobotToBuild(this.blueprint.collectingRobotsByMineralType())) {
             TreeNode child = node.addChild(mineralTypeToBuild);
             maxGeodesCollected = Math.max(maxGeodesCollected, collectMinerals(child));
             node.removeChild(child);

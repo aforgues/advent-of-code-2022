@@ -19,6 +19,9 @@ public class NotEnoughMineralsApp {
 
         // First part
         app.computeScore();
+
+        // Second part
+        app.computeScoreV2();
     }
 
     private final String filePath;
@@ -48,18 +51,34 @@ public class NotEnoughMineralsApp {
         AtomicInteger score = new AtomicInteger();
 
         this.blueprints.parallelStream().forEach(blueprint -> {
-        //for (Blueprint blueprint : this.blueprints) {
             Instant startBlueprint = Instant.now();
-            BlueprintExplorer blueprintExplorer = new BlueprintExplorer(blueprint);
+            BlueprintExplorer blueprintExplorer = new BlueprintExplorer(blueprint, 24);
             int nbMaxOpenedGeodes = blueprintExplorer.explore();
             Instant endBlueprint = Instant.now();
             System.out.println("Maximum number of geodes we could open for blueprint " + blueprint.id() + " is " + nbMaxOpenedGeodes + " => quality level of " + blueprint.id() * nbMaxOpenedGeodes + " computed in " + Duration.between(startBlueprint, endBlueprint).getSeconds() + "s");
             score.addAndGet(blueprint.id() * nbMaxOpenedGeodes);
-        //}
         });
 
         Instant end = Instant.now();
 
         System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+    }
+
+    private void computeScoreV2() {
+        Instant start = Instant.now();
+
+        AtomicInteger score = new AtomicInteger(1);
+        this.blueprints.parallelStream().limit(3).forEach(blueprint -> {
+            Instant startBlueprint = Instant.now();
+            BlueprintExplorer blueprintExplorer = new BlueprintExplorer(blueprint, 32);
+            int nbMaxOpenedGeodes = blueprintExplorer.explore();
+            Instant endBlueprint = Instant.now();
+            System.out.println("Maximum number of geodes we could open for blueprint " + blueprint.id() + " is " + nbMaxOpenedGeodes + " computed in " + Duration.between(startBlueprint, endBlueprint).getSeconds() + "s");
+            score.updateAndGet(v -> v * nbMaxOpenedGeodes);
+        });
+
+        Instant end = Instant.now();
+
+        System.out.println("Score V2 : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 }

@@ -41,53 +41,76 @@ public class TreeNode {
         return this.getCollectedMineralByType(MineralType.GEODE);
     }
 
-    public List<MineralType> getEligibleMineralTypeOfCollectingRobotToBuild(Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
+    public List<MineralType> getMineralTypeOfCollectingRobotToBuild(Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
+        List<MineralType> eligibleMineralTypeOfCollectingRobotToBuild = getEligibleMineralTypeOfCollectingRobotToBuild(collectingRobotsByMineralTypeBlueprint);
+
+        // Heuristic 4 : if we can build geode, only build geode
+        if (eligibleMineralTypeOfCollectingRobotToBuild.contains(MineralType.GEODE))
+            return List.of(MineralType.GEODE);
+
+        // Heuristic 3 : don't build robot above the max cost of its mineral type
+        Set<MineralType> typesToDiscard = new HashSet<>();
+        for (MineralType type : MineralType.values()) {
+            if (! this.needToBuildCollectingRobot(type, collectingRobotsByMineralTypeBlueprint))
+                typesToDiscard.add(type);
+        }
+
+        // Heuristic 2 : if building X and parent did not but could have => skip
+        if (this.parent != null && this.mineralTypeToBuild == null) {
+            for (MineralType type : eligibleMineralTypeOfCollectingRobotToBuild) {
+                if (type == null)
+                    continue;
+                List<MineralType> parentEligibleTypes = this.parent.getEligibleMineralTypeOfCollectingRobotToBuild(collectingRobotsByMineralTypeBlueprint);
+                if (parentEligibleTypes.contains(type))
+                    typesToDiscard.add(type);
+            }
+        }
+        eligibleMineralTypeOfCollectingRobotToBuild.removeAll(typesToDiscard);
+
+        return eligibleMineralTypeOfCollectingRobotToBuild;
+    }
+
+    // Heuristic 3 : don't build robot above the max cost of its mineral type
+    private boolean needToBuildCollectingRobot(MineralType type, Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
+        if (type == MineralType.GEODE)
+            return true;
+        int maxCost = collectingRobotsByMineralTypeBlueprint.values().stream()
+                .map(collectingRobot -> collectingRobot.costByMineralType().get(type) != null
+                        ? collectingRobot.costByMineralType().get(type)
+                        : 0)
+                .reduce(0, Integer::max);
+        return this.getCollectingRobotByType(type) < maxCost;
+    }
+
+    private List<MineralType> getEligibleMineralTypeOfCollectingRobotToBuild(Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
         // what minerals do I have in order to build new collecting robots
         List<MineralType> eligibleMineralTypeOfCollectingRobotToBuild = new ArrayList<>();
 
         // First add Null to allow collect only child
         eligibleMineralTypeOfCollectingRobotToBuild.add(null);
 
-        // TODO : find heuristics to reduce variations considering dynamic data (nb of collecting robots, nb of collected minerals, current minute...)
-
         // - check ore collecting robot
         int collectedOre = this.getCollectedMineralByType(MineralType.ORE);
-        if (this.needToBuildCollectingRobot(MineralType.ORE, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.ORE).costByMineralType().get(MineralType.ORE))
+        if (collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.ORE).costByMineralType().get(MineralType.ORE))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.ORE);
 
         // - check clay collecting robot
-        if (this.needToBuildCollectingRobot(MineralType.CLAY, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.CLAY).costByMineralType().get(MineralType.ORE))
+        if (collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.CLAY).costByMineralType().get(MineralType.ORE))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.CLAY);
 
         // - check obsidian collecting robot
         int collectedClay = this.getCollectedMineralByType(MineralType.CLAY);
-        if (this.needToBuildCollectingRobot(MineralType.OBSIDIAN, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.ORE)
+        if (collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.ORE)
                 && collectedClay >= collectingRobotsByMineralTypeBlueprint.get(MineralType.OBSIDIAN).costByMineralType().get(MineralType.CLAY))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.OBSIDIAN);
 
         // - check geode collecting robot
         int collectedObsidian = this.getCollectedMineralByType(MineralType.OBSIDIAN);
-        if (this.needToBuildCollectingRobot(MineralType.GEODE, collectingRobotsByMineralTypeBlueprint) && collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.ORE)
+        if (collectedOre >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.ORE)
                 && collectedObsidian >= collectingRobotsByMineralTypeBlueprint.get(MineralType.GEODE).costByMineralType().get(MineralType.OBSIDIAN))
             eligibleMineralTypeOfCollectingRobotToBuild.add(MineralType.GEODE);
 
-        // Heuristic 4 : if we can build geode, only build geode
-        if (eligibleMineralTypeOfCollectingRobotToBuild.contains(MineralType.GEODE))
-            return List.of(MineralType.GEODE);
-
         return eligibleMineralTypeOfCollectingRobotToBuild;
-    }
-
-    private boolean needToBuildCollectingRobot(MineralType type, Map<MineralType, CollectingRobot> collectingRobotsByMineralTypeBlueprint) {
-        // Heuristic 3 : don't build robot above the max cost of its mineral type
-        if (type == MineralType.GEODE)
-            return true;
-        int maxCost = collectingRobotsByMineralTypeBlueprint.values().stream()
-                                .map(collectingRobot -> collectingRobot.costByMineralType().get(type) != null
-                                                        ? collectingRobot.costByMineralType().get(type)
-                                                        : 0)
-                                .reduce(0, Integer::max);
-        return this.getCollectingRobotByType(type) < maxCost;
     }
 
     public void removeChild(TreeNode child) {
