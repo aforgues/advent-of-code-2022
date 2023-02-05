@@ -21,3 +21,4 @@ Here are the puzzle pitches :
 - [Day 17 - Pyroclastic Flow](./docs/day17.md) ⭐💥
 - [Day 18 - Boiling Boulders](./docs/day18.md) ⭐💥
 - [Day 19 - Not Enough Minerals](./docs/day19.md) ⭐⭐
+- [Day 20 - Grove Positioning System](./docs/day20.md) 💥
