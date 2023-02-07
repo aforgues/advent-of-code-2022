@@ -9,8 +9,10 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class MonkeyMathApp {
-
     private static final boolean TEST = false;
+
+    private final static String ROOT_MONKEY_NAME = "root";
+    private final static String MY_MONKEY_NAME = "humn";
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = TEST ? "src/main/resources/day21/puzzle_input_test.txt" : "src/main/resources/day21/puzzle_input.txt";
@@ -47,7 +49,7 @@ public class MonkeyMathApp {
         Instant start = Instant.now();
 
         // Get root job
-        MonkeyJob rootJob = this.monkeyJobByMonkeyNames.get("root");
+        MonkeyJob rootJob = this.monkeyJobByMonkeyNames.get(ROOT_MONKEY_NAME);
 
         long score = rootJob.computeNumber(this.monkeyJobByMonkeyNames, null);
 
@@ -56,48 +58,10 @@ public class MonkeyMathApp {
         System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 
-    private final static String MY_MONKEY_NAME = "humn";
-
     private void computeScoreV2() {
         Instant start = Instant.now();
 
-        // Get root job
-        MonkeyJob rootJob = this.monkeyJobByMonkeyNames.get("root");
-
-        long score = 0;
-
-        Optional<MathOperation> mathOperation = rootJob.getMathOperation();
-        if (mathOperation.isPresent()) {
-            MonkeyJob leftRootMonkeyJob = this.monkeyJobByMonkeyNames.get(mathOperation.get().getLeftOperand());
-            MonkeyJob rightRootMonkeyJob = this.monkeyJobByMonkeyNames.get(mathOperation.get().getRightOperand());
-
-            Long leftScore = null;
-            try {
-                leftScore = leftRootMonkeyJob.computeNumber(this.monkeyJobByMonkeyNames, MY_MONKEY_NAME);
-                //System.out.println("Left : " + leftScore);
-            }
-            catch (RuntimeException e) {
-                //System.out.println("Left root monkey yell at me !!");
-            }
-            Long rightScore = null;
-            try {
-                rightScore = rightRootMonkeyJob.computeNumber(this.monkeyJobByMonkeyNames, MY_MONKEY_NAME);
-                //System.out.println("Right : " + rightScore);
-            }
-            catch (RuntimeException e) {
-                //System.out.println("Right root monkey yell at me !!");
-            }
-
-            if (leftScore == null) {
-                System.out.println("Equation to solve : " + mathOperation.get().getLeftOperand() + " = " + rightScore);
-                score = reverseComputeMySpecificNumber(mathOperation.get().getLeftOperand(), rightScore);
-            }
-
-            if (rightScore == null) {
-                System.out.println("Equation to solve : " + leftScore + " = " + mathOperation.get().getRightOperand());
-                score = reverseComputeMySpecificNumber(mathOperation.get().getRightOperand(), leftScore);
-            }
-        }
+        long score = reverseComputeMySpecificNumber(ROOT_MONKEY_NAME, 0L);
 
         Instant end = Instant.now();
 
@@ -112,6 +76,8 @@ public class MonkeyMathApp {
 
         Optional<MathOperation> mathOperation = job.getMathOperation();
         if (mathOperation.isPresent()) {
+            String operationType = mathOperation.get().getType().getOperator();
+
             MonkeyJob leftMonkeyJob = this.monkeyJobByMonkeyNames.get(mathOperation.get().getLeftOperand());
             MonkeyJob rightMonkeyJob = this.monkeyJobByMonkeyNames.get(mathOperation.get().getRightOperand());
 
@@ -122,15 +88,20 @@ public class MonkeyMathApp {
                 leftScore = leftMonkeyJob.computeNumber(this.monkeyJobByMonkeyNames, MY_MONKEY_NAME);
                 //System.out.println("Left : " + leftScore);
 
-                System.out.println("SubEquation to solve : " + currentScore + " = " + leftScore + " " + mathOperation.get().getType().getOperator() + " " + mathOperation.get().getRightOperand());
-
-                // inverse operation type
-                currentScore = switch (mathOperation.get().getType()) {
-                    case PLUS -> currentScore - leftScore;
-                    case DIVIDE -> leftScore / currentScore;
-                    case MINUS -> leftScore - currentScore;
-                    case MULTIPLY -> currentScore / leftScore;
-                };
+                if (! monkeyName.equals(ROOT_MONKEY_NAME)) {
+                    System.out.println("SubEquation to solve : " + currentScore + " = " + leftScore + " " + operationType + " " + mathOperation.get().getRightOperand());
+                    // inverse operation type
+                    currentScore = switch (mathOperation.get().getType()) {
+                        case PLUS -> currentScore - leftScore;
+                        case DIVIDE -> leftScore / currentScore;
+                        case MINUS -> leftScore - currentScore;
+                        case MULTIPLY -> currentScore / leftScore;
+                    };
+                }
+                else {
+                    System.out.println("Equation to solve : " + leftScore + " = " + mathOperation.get().getRightOperand());
+                    currentScore = leftScore;
+                }
                 return reverseComputeMySpecificNumber(mathOperation.get().getRightOperand(), currentScore);
             }
             catch (RuntimeException e) {
@@ -144,15 +115,21 @@ public class MonkeyMathApp {
                 rightScore = rightMonkeyJob.computeNumber(this.monkeyJobByMonkeyNames, MY_MONKEY_NAME);
                 //System.out.println("Right : " + rightScore);
 
-                System.out.println("SubEquation to solve : " + currentScore + " = " + mathOperation.get().getLeftOperand() + " " + mathOperation.get().getType().getOperator() + " " + rightScore);
 
-                // inverse operation type
-                currentScore = switch (mathOperation.get().getType()) {
-                    case DIVIDE -> currentScore * rightScore;
-                    case MINUS -> currentScore + rightScore;
-                    case PLUS -> currentScore - rightScore;
-                    case MULTIPLY -> currentScore / rightScore;
-                };
+                if (! monkeyName.equals(ROOT_MONKEY_NAME)) {
+                    System.out.println("SubEquation to solve : " + currentScore + " = " + mathOperation.get().getLeftOperand() + " " + operationType + " " + rightScore);
+                    // inverse operation type
+                    currentScore = switch (mathOperation.get().getType()) {
+                        case DIVIDE -> currentScore * rightScore;
+                        case MINUS -> currentScore + rightScore;
+                        case PLUS -> currentScore - rightScore;
+                        case MULTIPLY -> currentScore / rightScore;
+                    };
+                }
+                else {
+                    System.out.println("Equation to solve : " + mathOperation.get().getLeftOperand() + " = " + rightScore);
+                    currentScore = rightScore;
+                }
                 return reverseComputeMySpecificNumber(mathOperation.get().getLeftOperand(), currentScore);
             }
             catch (RuntimeException e) {
