@@ -8,6 +8,10 @@ public enum OperationType {
     MINUS("-"),
     DIVIDE("/");
 
+    public String getOperator() {
+        return operator;
+    }
+
     private final String operator;
 
     OperationType(String operator) {

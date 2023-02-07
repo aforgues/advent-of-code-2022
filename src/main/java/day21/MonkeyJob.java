@@ -6,6 +6,11 @@ import java.util.Optional;
 public class MonkeyJob {
     private final Type type;
     private final Optional<Long> specificNumber;
+
+    public Optional<MathOperation> getMathOperation() {
+        return mathOperation;
+    }
+
     private final Optional<MathOperation> mathOperation;
 
     public MonkeyJob(Type type, Optional<Long> specificNumber, Optional<MathOperation> mathOperation) {
@@ -14,10 +19,10 @@ public class MonkeyJob {
         this.mathOperation = mathOperation;
     }
 
-    public long computeNumber(Map<String, MonkeyJob> monkeyJobByMonkeyNames) {
+    public long computeNumber(Map<String, MonkeyJob> monkeyJobByMonkeyNames, String myMonkeyName) {
         return switch (type) {
             case SPECIFIC_NUMBER -> this.specificNumber.get();
-            case MATH_OPERATION -> this.mathOperation.get().execute(monkeyJobByMonkeyNames);
+            case MATH_OPERATION -> this.mathOperation.get().execute(monkeyJobByMonkeyNames, myMonkeyName);
         };
     }
 
@@ -35,5 +40,13 @@ public class MonkeyJob {
         }
 
         return new MonkeyJob(type, optionalSpecificNumber, optionalMathOperation);
+    }
+
+    @Override
+    public String toString() {
+        return "MonkeyJob{" +
+                "type=" + type
+                + (specificNumber.map(aLong -> (", specificNumber=" + aLong)).orElseGet(() -> (", mathOperation=" + mathOperation.get()))) +
+                '}';
     }
 }
