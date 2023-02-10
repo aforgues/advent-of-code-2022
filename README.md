@@ -23,3 +23,4 @@ Here are the puzzle pitches :
 - [Day 19 - Not Enough Minerals](./docs/day19.md) ⭐⭐
 - [Day 20 - Grove Positioning System](./docs/day20.md) 💥
 - [Day 21 - Monkey Math](./docs/day21.md) ⭐⭐
+- [Day 22 - Monkey Map](./docs/day22.md) ⭐
