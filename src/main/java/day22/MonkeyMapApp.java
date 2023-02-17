@@ -7,14 +7,17 @@ import java.util.*;
 
 public class MonkeyMapApp {
 
-    private static final boolean TEST = false;
+    private static final boolean TEST = true;
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = TEST ? "src/main/resources/day22/puzzle_input_test.txt" : "src/main/resources/day22/puzzle_input.txt";
         MonkeyMapApp app = new MonkeyMapApp(path);
 
         // First part
-        app.computeScore();
+        app.computeScore(WrappingAroundMode.FLAT);
+
+        // Second part
+        app.computeScore(WrappingAroundMode.CUBE);
     }
 
     private final String filePath;
@@ -51,13 +54,13 @@ public class MonkeyMapApp {
         //System.out.println("Path fo follow : " + path);
     }
 
-    private void computeScore() {
+    private void computeScore(WrappingAroundMode wrappingAroundMode) {
         Instant start = Instant.now();
 
-        int score = new PasswordExplorer(this.monkeyMap, this.path).explore();
+        int score = new PasswordExplorer(this.monkeyMap, this.path, wrappingAroundMode).explore();
 
         Instant end = Instant.now();
 
-        System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+        System.out.println("Score in " + wrappingAroundMode + " mode : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 }
