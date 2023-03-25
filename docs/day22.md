@@ -152,3 +152,4 @@ The final password is still calculated from your final position and facing from 
 
 Fold the map into a cube, **then** follow the path given in the monkeys' notes. **What is the final password?**
 
+Your puzzle answer was `124302`.
