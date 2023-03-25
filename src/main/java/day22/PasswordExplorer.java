@@ -4,6 +4,7 @@ import day08.Direction;
 import day09.Position;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class PasswordExplorer {
     private static final boolean DEBUG = false;
@@ -11,16 +12,18 @@ public class PasswordExplorer {
     private final MonkeyMap monkeyMap;
     private final Path pathToExplore;
     private final WrappingAroundMode wrappingAroundMode;
+    private final int faceSize;
 
-    private Set<Position> exploredPositions;
+    private final List<Position> exploredPositions;
     private Direction currentDirection = Direction.RIGHT;
     private Direction lastDirectionExplored;
 
-    public PasswordExplorer(MonkeyMap monkeyMap, Path pathToExplore, WrappingAroundMode wrappingAroundMode) {
+    public PasswordExplorer(MonkeyMap monkeyMap, Path pathToExplore, WrappingAroundMode wrappingAroundMode, int faceSize) {
         this.monkeyMap = monkeyMap;
         this.pathToExplore = pathToExplore;
-        this.exploredPositions = new LinkedHashSet<>();
+        this.exploredPositions = new ArrayList<>();
         this.wrappingAroundMode = wrappingAroundMode;
+        this.faceSize = faceSize;
     }
 
     public int explore() {
@@ -29,8 +32,9 @@ public class PasswordExplorer {
         System.out.println("Start exploring monkey map, starting at " + currentPosition);
 
         // follow the path now
+        int i = 1;
         for (Move move : this.pathToExplore.moves()) {
-            System.out.println("Moving " + this.currentDirection + " in the monkey map in " + move);
+            System.out.println(i++ + "/" + this.pathToExplore.moves().size() + " : Moving " + this.currentDirection + " in the monkey map in " + move);
             currentPosition = this.computeNextPosition(currentPosition, move);
             System.out.println("Next position is : " + currentPosition);
             if (DEBUG)
@@ -131,166 +135,175 @@ public class PasswordExplorer {
             };
         }
         else {
-            // first extract current position and identify on which face of the cube it is
+            // first extract current position
             Position currentPosition = (Position) this.exploredPositions.toArray()[this.exploredPositions.size() - 1];
             if (DEBUG)
                 System.out.println("Current position before wrapping is " + currentPosition);
-            int cubeFaceSize = this.monkeyMap.rowsByRowNumber().size() / 3;
-            if (DEBUG)
-                System.out.println("CubeFace Size is " + cubeFaceSize);
-            int faceId;
-            if (currentPosition.x() <= cubeFaceSize) {
-                faceId = 2;
-            }
-            else if (currentPosition.x() <= 2 * cubeFaceSize) {
-                faceId = 3;
-            }
-            else if (currentPosition.x() > 3 * cubeFaceSize) {
-                faceId = 6;
-            }
-            else {
-                if (currentPosition.y() <= cubeFaceSize) {
-                    faceId = 1;
-                }
-                else if (currentPosition.y() <= 2 * cubeFaceSize) {
-                    faceId = 4;
-                }
-                else {
-                    faceId = 5;
-                }
-            }
-            if (DEBUG)
-                System.out.println("Face Id is " + faceId);
-
-            // Update currentDirection linked to face wrapping around and return matching wrapped around tile position
-            Position nextWrappedPosition;
-            switch (faceId) {
-                case 1 :
-                    switch (this.currentDirection) {
-                        case RIGHT -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtRow(this.monkeyMap.rowsByRowNumber().size() - currentPosition.y() + 1);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.LEFT; // on face 6, last tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case LEFT -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtColumn(currentPosition.y() + cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.DOWN; // on face 3, first tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case UP -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtColumn(cubeFaceSize - currentPosition.x() % cubeFaceSize + 1);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.DOWN; // on face 2, first tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                case 2 :
-                    switch (this.currentDirection) {
-                        case UP -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtColumn(cubeFaceSize - currentPosition.x() + 1 + 2 * cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.DOWN; // on face 1, first tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case LEFT -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtColumn(cubeFaceSize - currentPosition.y() + 1 + cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.UP; // on face 6, last tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case DOWN -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtColumn(cubeFaceSize - currentPosition.x() + 1);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.UP; // on face 5, last tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                case 3 :
-                    switch (this.currentDirection) {
-                        case UP -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtRow(currentPosition.x() % cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.RIGHT; // on face 1, first tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case DOWN -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtRow(cubeFaceSize - currentPosition.x() % cubeFaceSize + 1 + 2 * cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.RIGHT; // on face 5, first tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                case 4 :
-                    switch (this.currentDirection) {
-                        case RIGHT -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtColumn(cubeFaceSize - currentPosition.y() % cubeFaceSize + 1 + 3 * cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.DOWN; // on face 6, first tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                case 5 :
-                    switch (this.currentDirection) {
-                        case LEFT -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtColumn(cubeFaceSize - currentPosition.y() % cubeFaceSize + 1 + cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.UP; // on face 3, last tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case DOWN -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtColumn(cubeFaceSize - currentPosition.x() % cubeFaceSize + 1);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.UP; // on face 2, last tile at column
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                case 6 :
-                    switch (this.currentDirection) {
-                        case UP -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtRow(cubeFaceSize - currentPosition.x() % cubeFaceSize + 1 + cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.LEFT; // on face 4, last tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case RIGHT -> {
-                            nextWrappedPosition = this.computeLastOpenTilePositionAtRow(cubeFaceSize - currentPosition.y() % cubeFaceSize + 1);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.LEFT; // on face 1, last tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        case DOWN -> {
-                            nextWrappedPosition = this.computeFirstOpenTilePositionAtRow(cubeFaceSize - currentPosition.x() % cubeFaceSize + 1 + cubeFaceSize);
-                            if (nextWrappedPosition != null) {
-                                this.currentDirection = Direction.RIGHT; // on face 2, first tile at row
-                            }
-                            return nextWrappedPosition;
-                        }
-                        default -> throw new IllegalStateException("Should not wrap around from face " + faceId + " in the direction " + this.currentDirection);
-                    }
-                default :
-                    throw new IllegalStateException("Should not wrap around from unkown face " + faceId);
-            }
+            return computeNextWrappedAroundPositionInCubeMode(currentPosition);
         }
+    }
+
+    private Position computeNextWrappedAroundPositionInCubeMode(Position currentPosition) {
+        return switch (this.currentDirection) {
+            case RIGHT -> computeNextWrappedAroundPositionInCubeModeWithRotationType(currentPosition, RotationType.IDENTITY);
+            case LEFT -> computeNextWrappedAroundPositionInCubeModeWithRotationType(currentPosition, RotationType.ROTATE_180);
+            case DOWN -> computeNextWrappedAroundPositionInCubeModeWithRotationType(currentPosition, RotationType.ROTATE_270);
+            case UP -> computeNextWrappedAroundPositionInCubeModeWithRotationType(currentPosition, RotationType.ROTATE_90);
+        };
+    }
+
+    int computeRelativeValue(int value) {
+        int faceNumber = this.computeFaceNumberForValue(value);
+        return value - (faceNumber - 1) * this.faceSize;
+    }
+
+    // If we are on a face at position X and we move in cube mode, changing direction then the next position might be the symmetric of current one
+    // For example, we might go in (4x4) example from position (12,6) on Face number 4 to the right direction, wrapping around to Face number 6 going Down on the position (15,9)
+    // In this case, the symmetric value of y (6) will be used to define the next value for x (15) by adding starting x value (12) to symmetric of y base 4 (6 % 4 = 2) which is 3
+    int computeSymmetricRelativeValue(int value) {
+        int baseValue = value % this.faceSize;
+        int tempValue = this.faceSize - baseValue + 1;
+        return tempValue <= this.faceSize ? tempValue : tempValue % this.faceSize;
+    }
+
+    // For example, with (4x4) face size,
+    // - an x or y value of 6 should return 7
+    // - an x or y value of 1 should return 4
+    // - an x or y value of 11 should return 10
+    int computeSymmetricValueOnSameFace(int value) {
+        int faceNumber = this.computeFaceNumberForValue(value);
+        return this.faceSize * (faceNumber - 1) + this.computeSymmetricRelativeValue(value);
+    }
+
+    // Compute face number : first (if between 1 and faceSize), second (if between faceSize + 1 and 2 * faceSize) ...
+    private int computeFaceNumberForValue(int value) {
+        return value % this.faceSize == 0 ? value / this.faceSize : (value / this.faceSize + 1);
+    }
+
+    int computeFirstValueOnNextFace(int value) {
+        int faceNumber = this.computeFaceNumberForValue(value);
+        return this.faceSize * faceNumber + 1;
+    }
+
+    int computeLastValueOnPreviousFace(int value) {
+        int faceNumber = this.computeFaceNumberForValue(value);
+        return this.faceSize * (faceNumber - 1);
+    }
+
+    /**
+     * If my position is currently on face F and that I go to the RIGHT,
+     * Then the next wrapped around next position in cube mode could be either :
+     *  - in face 1 on the upper right : moving direction to the UP (starting with the last tile of the column "x + y%faceSize")
+     *  - in face 2 on the down right : moving direction to DOWN (starting with the first tile of the column "x + symmetric(y%faceSize)")
+     *  - in face 3 ...
+     *  - in face 4 ...
+     *  - in face 5 ...
+     *  - in face 6 ...
+     *  - in face 7 ...
+     *  - in face 8 ...
+     *  - in face 9 ...
+     *  - in face 10 as X ...
+     *  - in face 11 as Y ...
+     *
+     *  |9| |7| |4|
+     *  |X| | | |1|
+     *  |5| | |F| ->
+     *  |Y| | | |2|
+     *  |8| |6| |3|
+     */
+    Position computeNextWrappedAroundPositionInCubeModeWithRotationType(Position currentPosition, RotationType rotationType) {
+        try {
+            // Check if there is some tiles on face 1
+            // on the upper right : moving direction to the UP (starting with the last tile of the column "x + y%faceSize")
+            Position nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() + this.computeRelativeValue(p.y()), this.computeLastValueOnPreviousFace(p.y())), Direction.UP, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 2
+            // on the down right : moving direction to DOWN (starting with the first tile of the column "x + symmetric(y%faceSize)")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() + this.computeSymmetricRelativeValue(p.y()), this.computeFirstValueOnNextFace(p.y())), Direction.DOWN, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 3
+            // on the down right under face 2 : moving direction to LEFT (starting with the last tile of the row "symOnSameFace(y) + 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() + this.faceSize, this.computeSymmetricValueOnSameFace(p.y()) + 2 * this.faceSize), Direction.LEFT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 4
+            // on the up right above face 1 : moving direction to LEFT (starting with the last tile of the row "symOnSameFace(y) - 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() + this.faceSize, this.computeSymmetricValueOnSameFace(p.y()) - 2 * this.faceSize), Direction.LEFT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 5
+            // on the left : moving direction to RIGHT (starting with the first tile of the column "x - 4*faceSize + 1")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - 4 * this.faceSize + 1, p.y()), Direction.RIGHT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 6
+            // on the down left (at same row level of face 3) : moving direction to LEFT (starting with the last tile of the row "symmetric(y) + 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - this.faceSize, this.computeSymmetricValueOnSameFace(p.y()) + 2 * this.faceSize), Direction.LEFT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 7
+            // on the up left (at same row level of face 4) : moving direction to LEFT (starting with the last tile of the row "symmetric(y) - 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - this.faceSize, this.computeSymmetricValueOnSameFace(p.y()) - 2 * this.faceSize), Direction.LEFT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 8
+            // on the down left (at same row level of face 3 and 6, and same column level of face 5) : moving direction to RIGHT (starting with the first tile of the row "symmetric(y) + 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - 4 * this.faceSize + 1, p.y() + 2 * this.faceSize), Direction.RIGHT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+
+            // Check if there is some tiles on face 9
+            // on the up left (at same row level of face 4 and 7, and same column level of face 5) : moving direction to RIGHT (starting with the first tile of the row "symmetric(y) - 2*faceSize")
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - 4 * this.faceSize + 1, p.y() - 2 * this.faceSize), Direction.RIGHT, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 10
+            // on the bottom left (at same row level of face 2, and same column level of face 5) : moving direction to UP (starting with the last tile of the column)
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - 4 * this.faceSize + this.computeSymmetricRelativeValue(p.y()), this.computeLastValueOnPreviousFace(p.y()) + 2 * this.faceSize), Direction.UP, rotationType);
+            if (nextPosition != null) return nextPosition;
+
+            // Check if there is some tiles on face 11
+            // on the bottom left (at same row level of face 1, and same column level of face 5) : moving direction to DOWN (starting with the first tile of the column)
+            nextPosition = this.checkAndReturnNextPositionAndUpdateCurrentDirection(currentPosition,
+                    (p) -> new Position(p.x() - 4 * this.faceSize + this.computeSymmetricRelativeValue(p.y()), this.computeFirstValueOnNextFace(p.y()) - 2 * this.faceSize), Direction.DOWN, rotationType);
+            if (nextPosition != null) return nextPosition;
+        }
+        catch (MonkeyMapTileWithSolidWallException e) {
+            return null;
+        }
+
+        throw new IllegalStateException("No next wrapped around position going " + this.currentDirection.name().toLowerCase() + " found from current position : " + currentPosition);
+    }
+
+    private Position checkAndReturnNextPositionAndUpdateCurrentDirection(Position currentPosition, Function<Position, Position> nextWrappedAroundPositionWhileGoingRightInCubeModeFunc, Direction newDirectionWhileGoingRight, RotationType rotationType) throws MonkeyMapTileWithSolidWallException {
+        // First convert current position with rotation type in order to be in the same setup as going to the right
+        Position convertedCurrentPosition = this.monkeyMap.convertPosition(currentPosition, rotationType);
+
+        // Then apply function to find nexPositionWhileGoingRight
+        Position nextPositionWhileGoingRight = nextWrappedAroundPositionWhileGoingRightInCubeModeFunc.apply(convertedCurrentPosition);
+
+        // Then unconvert target position to come back to the original direction setup comparing to going to the right
+        Tile tile = this.monkeyMap.getNonEmptyTileAt(this.monkeyMap.unconvertPosition(nextPositionWhileGoingRight, rotationType));
+        if (tile != null) {
+            if (tile.type() == Type.OPEN_TILE) {
+                this.currentDirection = newDirectionWhileGoingRight.rotate(rotationType);
+                return tile.position();
+            }
+            throw new MonkeyMapTileWithSolidWallException();
+        }
+        return null;
     }
 
     private Position computeFirstOpenTilePositionAtRow(int row) {

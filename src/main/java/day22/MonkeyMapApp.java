@@ -7,7 +7,7 @@ import java.util.*;
 
 public class MonkeyMapApp {
 
-    private static final boolean TEST = true;
+    private static final boolean TEST = false;
 
     public static void main(String[] args) throws FileNotFoundException {
         String path = TEST ? "src/main/resources/day22/puzzle_input_test.txt" : "src/main/resources/day22/puzzle_input.txt";
@@ -21,8 +21,8 @@ public class MonkeyMapApp {
     }
 
     private final String filePath;
-    private MonkeyMap monkeyMap;
-    private Path path;
+    MonkeyMap monkeyMap;
+    Path path;
 
     public MonkeyMapApp(String filePath) throws FileNotFoundException {
         this.filePath = filePath;
@@ -57,7 +57,7 @@ public class MonkeyMapApp {
     private void computeScore(WrappingAroundMode wrappingAroundMode) {
         Instant start = Instant.now();
 
-        int score = new PasswordExplorer(this.monkeyMap, this.path, wrappingAroundMode).explore();
+        int score = new PasswordExplorer(this.monkeyMap, this.path, wrappingAroundMode, TEST ? 4 : 50).explore();
 
         Instant end = Instant.now();
 
