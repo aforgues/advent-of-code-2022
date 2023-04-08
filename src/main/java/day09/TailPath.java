@@ -1,5 +1,7 @@
 package day09;
 
+import utils.Position;
+
 import java.util.ArrayList;
 import java.util.List;
 

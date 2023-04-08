@@ -1,7 +1,7 @@
 package day22;
 
 import day08.Direction;
-import day09.Position;
+import utils.Position;
 
 import java.util.*;
 import java.util.function.Function;

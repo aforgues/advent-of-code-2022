@@ -1,6 +1,6 @@
 package day14;
 
-import day09.Position;
+import utils.Position;
 
 public class SandUnit {
     private Position position;

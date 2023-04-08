@@ -1,6 +1,6 @@
 package day15;
 
-import day09.Position;
+import utils.Position;
 
 import java.io.File;
 import java.io.FileNotFoundException;

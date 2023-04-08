@@ -1,6 +1,6 @@
 package day22;
 
-import day09.Position;
+import utils.Position;
 
 import java.util.Collection;
 import java.util.List;

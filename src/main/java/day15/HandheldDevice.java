@@ -1,6 +1,6 @@
 package day15;
 
-import day09.Position;
+import utils.Position;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;

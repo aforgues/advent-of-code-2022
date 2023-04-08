@@ -1,6 +1,6 @@
 package day12;
 
-import day09.Position;
+import utils.Position;
 
 public enum Move {
     UP("^"),

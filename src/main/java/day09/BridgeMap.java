@@ -1,6 +1,7 @@
 package day09;
 
 import day08.Direction;
+import utils.Position;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -1,6 +1,6 @@
 package day22;
 
-import day09.Position;
+import utils.Position;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;

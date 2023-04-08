@@ -1,6 +1,6 @@
 package day22;
 
-import day09.Position;
+import utils.Position;
 
 public record Tile(Type type, Position position) {
 }
