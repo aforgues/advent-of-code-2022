@@ -24,3 +24,4 @@ Here are the puzzle pitches :
 - [Day 20 - Grove Positioning System](./docs/day20.md) 💥
 - [Day 21 - Monkey Math](./docs/day21.md) ⭐⭐
 - [Day 22 - Monkey Map](./docs/day22.md) ⭐⭐
+- [Day 23 - Unstable Diffusion](./docs/day23.md) ⭐
