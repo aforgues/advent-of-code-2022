@@ -1,5 +1,6 @@
 package day12;
 
+import utils.Move;
 import utils.Position;
 
 import java.util.ArrayList;
