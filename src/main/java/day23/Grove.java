@@ -33,8 +33,8 @@ public record Grove(List<Elve> elves) {
     public void displayInConsole() {
         StringBuffer sb = new StringBuffer();
 
-        for (int y = 1; y <= computeMaxElveRowPosition(); y++) {
-            for (int x = 1; x <= computeMaxElveColumnPosition(); x++) {
+        for (int y = computeMinElveRowPosition(); y <= computeMaxElveRowPosition(); y++) {
+            for (int x = computeMinElveColumnPosition(); x <= computeMaxElveColumnPosition(); x++) {
                 Position position = new Position(x, y);
                 if (this.elves.stream().map(Elve::position).anyMatch(p -> p.equals(position))) {
                     sb.append("#");

@@ -19,14 +19,16 @@ public class UnstableDiffusionApp {
 
         // First part
         app.computeScore();
+
+        // Second part
+        app.computeScorePart2();
     }
 
     private final String filePath;
     private Grove grove;
 
-    public UnstableDiffusionApp(String filePath) throws FileNotFoundException {
+    public UnstableDiffusionApp(String filePath) {
         this.filePath = filePath;
-        this.parseFile();
     }
 
     private void parseFile() throws FileNotFoundException {
@@ -50,7 +52,8 @@ public class UnstableDiffusionApp {
         System.out.println(this.grove);
     }
 
-    private void computeScore() {
+    private void computeScore() throws FileNotFoundException {
+        this.parseFile();
         Instant start = Instant.now();
 
         int score = new DiffusionProcess(grove).launch();
@@ -58,5 +61,16 @@ public class UnstableDiffusionApp {
         Instant end = Instant.now();
 
         System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+    }
+
+    private void computeScorePart2() throws FileNotFoundException {
+        this.parseFile();
+        Instant start = Instant.now();
+
+        int score = new DiffusionProcess(grove).launchUntilNoElvesMove();
+
+        Instant end = Instant.now();
+
+        System.out.println("Score part 2 : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 }
