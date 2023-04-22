@@ -20,6 +20,9 @@ public class BlizzardBasinApp {
 
         // First part
         app.computeScore();
+
+        // Second part
+        app.computeScorePart2();
     }
 
     private final String filePath;
@@ -66,10 +69,25 @@ public class BlizzardBasinApp {
     private void computeScore() {
         Instant start = Instant.now();
 
-        int score = new Expedition(this.valley, this.blizzards).exploreBFS();
+        int score = new Expedition(this.valley).exploreBFS(this.blizzards, this.valley.getStartPosition(), this.valley.getExitPosition());
 
         Instant end = Instant.now();
 
-        System.out.println("Score : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+        System.out.println("Score part 1 : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
+    }
+
+    private void computeScorePart2() {
+        Instant start = Instant.now();
+
+        Expedition expedition = new Expedition(this.valley);
+
+        int score1 = expedition.exploreBFS(this.blizzards, this.valley.getStartPosition(), this.valley.getExitPosition());
+        int score2 = expedition.exploreBFS(expedition.getBlizzardsAt(score1), this.valley.getExitPosition(), this.valley.getStartPosition());
+        int score3 = expedition.exploreBFS(expedition.getBlizzardsAt(score2), this.valley.getStartPosition(), this.valley.getExitPosition());
+        int score = score1 + score2 + score3;
+
+        Instant end = Instant.now();
+
+        System.out.println("Score part 2 : " + score + " in " + (end.toEpochMilli() - start.toEpochMilli()) + "ms");
     }
 }

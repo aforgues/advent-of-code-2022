@@ -48,4 +48,12 @@ public record Valley(List<Position> walls) {
         return position.x() >= 1 && position.x() <= getMaxColumnInValley()
                 && position.y() >= 1 && position.y() <= getMaxRowInValley();
     }
+
+    public Position getStartPosition() {
+        return new Position(2,1);
+    }
+
+    public Position getExitPosition() {
+        return new Position(this.getMaxColumnInValley() - 1, this.getMaxRowInValley());
+    }
 }

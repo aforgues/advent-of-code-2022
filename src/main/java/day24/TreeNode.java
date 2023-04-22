@@ -14,8 +14,8 @@ public record TreeNode(TreeNode parent, int currentMinute, Position currentExped
         return new TreeNode(this, this.currentMinute + 1, nextPositionToExplore);
     }
 
-    public boolean hasReachedValleyExit(Valley valley) {
-        return this.currentExpeditionPosition.equals(new Position(valley.getMaxColumnInValley() - 1, valley.getMaxRowInValley()));
+    public boolean hasReachedValleyExit(Position exitPosition) {
+        return this.currentExpeditionPosition.equals(exitPosition);
     }
 
     public List<Position> getPotentialNextExpeditionPositions(List<Blizzard> nextBlizzards, Valley valley) {

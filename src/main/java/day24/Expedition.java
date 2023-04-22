@@ -6,23 +6,22 @@ import java.util.*;
 
 public class Expedition {
     private final Valley valley;
-    private final List<Blizzard> blizzards;
     private final Map<Integer, List<Blizzard>> blizzardsByMinute;
 
     private long nbNodeExplored = 0;
 
-    public Expedition(Valley valley, List<Blizzard> blizzards) {
+    public Expedition(Valley valley) {
         this.valley = valley;
-        this.blizzards = blizzards;
         this.blizzardsByMinute = new HashMap<>();
     }
 
-    public int exploreBFS() {
+    public int exploreBFS(List<Blizzard> blizzards, Position startPosition, Position exitPosition) {
         Queue<TreeNode> queue = new LinkedList<>();
         List<NodeKey> alreadySeenNodes = new ArrayList<>();
 
-        TreeNode root = new TreeNode(null, 0, new Position(2,1));
-        this.blizzardsByMinute.put(0, this.blizzards);
+        TreeNode root = new TreeNode(null, 0, startPosition);
+        this.blizzardsByMinute.clear();
+        this.blizzardsByMinute.put(0, blizzards);
         queue.add(root);
 
         while (! queue.isEmpty()) {
@@ -39,7 +38,7 @@ public class Expedition {
                 //node.displayValleyInConsole(this.valley, this.blizzardsByMinute);
             }
 
-            if (node.hasReachedValleyExit(this.valley)) {
+            if (node.hasReachedValleyExit(exitPosition)) {
                 System.out.println("Expedition path is " + node.getExpeditionPath());
                 node.displayFullExpeditionInConsole(this.valley, this.blizzardsByMinute);
                 return node.currentMinute();
@@ -65,5 +64,9 @@ public class Expedition {
             this.blizzardsByMinute.put(node.currentMinute() + 1, updatedBlizzards);
             return updatedBlizzards;
         }
+    }
+
+    public List<Blizzard> getBlizzardsAt(int minute) {
+        return this.blizzardsByMinute.get(minute);
     }
 }

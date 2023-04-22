@@ -25,4 +25,4 @@ Here are the puzzle pitches :
 - [Day 21 - Monkey Math](./docs/day21.md) ⭐⭐
 - [Day 22 - Monkey Map](./docs/day22.md) ⭐⭐
 - [Day 23 - Unstable Diffusion](./docs/day23.md) ⭐⭐
-- [Day 24 - Blizzard Basin](./docs/day24.md) ⭐
+- [Day 24 - Blizzard Basin](./docs/day24.md) ⭐⭐
