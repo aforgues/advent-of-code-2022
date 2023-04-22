@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Arrays;
+
 public enum Move {
     UP("^"),
     DOWN("v"),
@@ -16,6 +18,10 @@ public enum Move {
         this.sign = sign;
     }
 
+    public static Move from(String sign) {
+        return Arrays.stream(Move.values()).filter(move -> move.sign.equals(sign)).findFirst().orElse(null);
+    }
+
     public static Move from(Position from, Position to) {
         if (to.x() == from.x()) {
             if (to.y() > from.y())
@@ -27,6 +33,6 @@ public enum Move {
                 return RIGHT;
             return LEFT;
         }
-        throw new IllegalArgumentException("Unable to define Move base on postions from " + from + " and to " + to);
+        throw new IllegalArgumentException("Unable to define Move base on positions from " + from + " and to " + to);
     }
 }

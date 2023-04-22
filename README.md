@@ -1,5 +1,5 @@
 # Advent of code 2022
-Participation to the https://adventofcode.com/2022 in collaboration with ManoMano collegues (including [Jocelyn N'TAKPE](https://github.com/jntakpe/aoc2022), [Pavel Pratyush](https://github.com/pavelito/advent-of-code-2022) and Guillaume Granger) through a private Leaderboard
+Participation to the https://adventofcode.com/2022 in collaboration with ManoMano colleagues (including [Jocelyn N'TAKPE](https://github.com/jntakpe/aoc2022), [Pavel Pratyush](https://github.com/pavelito/advent-of-code-2022) and Guillaume Granger) through a private Leaderboard
 
 Here are the puzzle pitches :
 - [Day 1 - Calorie Counting](./docs/day01.md) ⭐⭐ 
@@ -25,3 +25,4 @@ Here are the puzzle pitches :
 - [Day 21 - Monkey Math](./docs/day21.md) ⭐⭐
 - [Day 22 - Monkey Map](./docs/day22.md) ⭐⭐
 - [Day 23 - Unstable Diffusion](./docs/day23.md) ⭐⭐
+- [Day 24 - Blizzard Basin](./docs/day24.md) ⭐

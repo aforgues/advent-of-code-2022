@@ -29,4 +29,13 @@ public record Position(int x, int y) {
             case NORTH_WEST -> new Position(x - 1, y - 1);
         };
     }
+
+    public Position moveTo(Move moveType) {
+        return switch (moveType) {
+            case UP -> new Position(x, y - 1);
+            case RIGHT -> new Position(x + 1, y);
+            case DOWN -> new Position(x, y + 1);
+            case LEFT -> new Position(x - 1, y);
+        };
+    }
 }
