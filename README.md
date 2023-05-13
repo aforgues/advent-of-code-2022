@@ -26,4 +26,4 @@ Here are the puzzle pitches :
 - [Day 22 - Monkey Map](./docs/day22.md) ⭐⭐
 - [Day 23 - Unstable Diffusion](./docs/day23.md) ⭐⭐
 - [Day 24 - Blizzard Basin](./docs/day24.md) ⭐⭐
-- [Day 25 - Full Of Hot Air](./docs/day25.md) 
+- [Day 25 - Full Of Hot Air](./docs/day25.md) ⭐
