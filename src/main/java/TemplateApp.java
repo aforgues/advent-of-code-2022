@@ -6,10 +6,10 @@ import java.util.Scanner;
 public class TemplateApp {
 
     private static final boolean TEST = true;
+    private static final String PUZZLE_INPUT_FILE_NAME = TEST ? "puzzle_input_test.txt" : "puzzle_input.txt";
 
     public static void main(String[] args) throws FileNotFoundException {
-        String path = TEST ? "src/main/resources/dayXX/puzzle_input_test.txt" : "src/main/resources/dayXX/puzzle_input.txt";
-        TemplateApp app = new TemplateApp(path);
+        TemplateApp app = new TemplateApp();
 
         // First part
         app.computeScore();
@@ -17,8 +17,9 @@ public class TemplateApp {
 
     private final String filePath;
 
-    public TemplateApp(String filePath) throws FileNotFoundException {
-        this.filePath = filePath;
+    public TemplateApp() throws FileNotFoundException {
+        String BASE_PATH = "src/main/resources/" + this.getClass().getPackageName() + "/";
+        this.filePath = BASE_PATH + PUZZLE_INPUT_FILE_NAME;
         this.parseFile();
     }
 
@@ -35,7 +36,7 @@ public class TemplateApp {
     private void computeScore() {
         Instant start = Instant.now();
 
-        int score = 0;
+        long score = 0;
 
         Instant end = Instant.now();
 
